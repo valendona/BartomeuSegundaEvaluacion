@@ -25,6 +25,17 @@ public class AlbaranDAO {
         }
     }
 
+    public org.facturacion.model.Albaran buscarPorIdConLineas(String id) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            List<org.facturacion.model.Albaran> results = session.createQuery(
+                    "select a from Albaran a left join fetch a.lineas where a.id = :id",
+                    org.facturacion.model.Albaran.class
+            ).setParameter("id", id).list();
+
+            return results.isEmpty() ? null : results.get(0);
+        }
+    }
+
     public List<org.facturacion.model.Albaran> listarTodos() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery("from Albaran", org.facturacion.model.Albaran.class).list();

@@ -37,4 +37,7 @@ public class LineaFactura {
     public double getSubtotal() { return subtotal; }
 
     public void setFactura(Factura factura) { this.factura = factura; }
+    public void setArticulo(Articulo articulo) { this.articulo = articulo; }
+    public void setCantidad(int cantidad) { this.cantidad = cantidad; }
+    public void setSubtotal(double subtotal) { this.subtotal = subtotal; }
 }

@@ -2,10 +2,13 @@ package org.facturacion.ui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class VentanaPrincipal extends JFrame {
 
     private final JPanel panelContenido;
+    private final JPanel panelInicio; // nuevo panel de inicio con accesos directos
 
     public VentanaPrincipal() {
 
@@ -44,9 +47,14 @@ public class VentanaPrincipal extends JFrame {
         add(panelContenido, BorderLayout.CENTER);
 
         // -------------------------
+        // INICIO (ACCESOS DIRECTOS)
+        // -------------------------
+        panelInicio = buildInicioPanel();
+
+        // -------------------------
         // ACCIONES DE LOS BOTONES
         // -------------------------
-        btnInicio.addActionListener(e -> mostrarPanel(new JLabel("Bienvenido", SwingConstants.CENTER)));
+        btnInicio.addActionListener(e -> mostrarPanel(panelInicio));
         btnClientes.addActionListener(e -> mostrarPanel(new VentanaClientes()));
         btnArticulos.addActionListener(e -> mostrarPanel(new VentanaArticulos()));
         btnAlbaranes.addActionListener(e -> mostrarPanel(new VentanaAlbaranes()));
@@ -54,7 +62,110 @@ public class VentanaPrincipal extends JFrame {
         btnConfig.addActionListener(e -> mostrarPanel(new VentanaConfiguracion()));
 
         // Mostrar inicio por defecto
-        mostrarPanel(new JLabel("Bienvenido", SwingConstants.CENTER));
+        mostrarPanel(panelInicio);
+    }
+
+    private JPanel buildInicioPanel() {
+        JPanel inicio = new JPanel(new BorderLayout());
+        inicio.setBackground(Color.WHITE);
+        inicio.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+
+        JLabel titulo = new JLabel("Bienvenido al Sistema de Facturación", SwingConstants.CENTER);
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titulo.setBorder(BorderFactory.createEmptyBorder(10, 0, 30, 0));
+        inicio.add(titulo, BorderLayout.NORTH);
+
+        // Usar dos filas centradas: topRow (3 tarjetas) y bottomRow (2 tarjetas)
+        JPanel topRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        topRow.setBackground(Color.WHITE);
+        topRow.add(createShortcutButton("Clientes", "Gestiona clientes", e -> mostrarPanel(new VentanaClientes())));
+        topRow.add(createShortcutButton("Artículos", "Gestiona artículos", e -> mostrarPanel(new VentanaArticulos())));
+        topRow.add(createShortcutButton("Albaranes", "Gestiona albaranes", e -> mostrarPanel(new VentanaAlbaranes())));
+
+        JPanel bottomRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        bottomRow.setBackground(Color.WHITE);
+        bottomRow.add(createShortcutButton("Facturas", "Gestiona facturas", e -> mostrarPanel(new VentanaFacturas())));
+        bottomRow.add(createShortcutButton("Configuración", "Ajustes del sistema", e -> mostrarPanel(new VentanaConfiguracion())));
+
+        JPanel rows = new JPanel();
+        rows.setLayout(new BoxLayout(rows, BoxLayout.Y_AXIS));
+        rows.setBackground(Color.WHITE);
+        rows.add(topRow);
+        rows.add(Box.createVerticalStrut(10));
+        rows.add(bottomRow);
+
+        // Centrar las filas en el panel
+        JPanel centerWrapper = new JPanel(new GridBagLayout());
+        centerWrapper.setBackground(Color.WHITE);
+        centerWrapper.add(rows);
+
+        inicio.add(centerWrapper, BorderLayout.CENTER);
+
+        // Pie con ayuda breve
+        JLabel pie = new JLabel("Usa los accesos para navegar rápidamente", SwingConstants.CENTER);
+        pie.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
+        inicio.add(pie, BorderLayout.SOUTH);
+
+        return inicio;
+    }
+
+    private JComponent createShortcutButton(String title, String subtitle, java.awt.event.ActionListener action) {
+        JPanel tarjeta = new JPanel(new GridBagLayout());
+        tarjeta.setBackground(Color.WHITE);
+        tarjeta.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
+
+        final Color primary = new Color(66, 133, 244);
+        final Color hover = new Color(52, 103, 188);
+
+        JButton boton = new JButton();
+        boton.setFocusPainted(false);
+        boton.setBackground(primary);
+        boton.setForeground(Color.WHITE);
+        boton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        boton.setHorizontalAlignment(SwingConstants.CENTER);
+        boton.setVerticalAlignment(SwingConstants.CENTER);
+        boton.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        boton.setPreferredSize(new Dimension(220, 110));
+        // Usa HTML para saltos de línea y estilo, centrado
+        boton.setText("<html><div style='text-align:center'><span style='font-size:16px; font-weight:bold'>" + title + "</span><br><span style='font-size:12px;'>" + subtitle + "</span></div></html>");
+        boton.addActionListener(action);
+        boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        // Hover en boton
+        boton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                boton.setBackground(hover);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                boton.setBackground(primary);
+            }
+        });
+
+        // Hacer que toda la tarjeta sea clicable y muestre hover también
+        tarjeta.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                boton.setBackground(hover);
+                tarjeta.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                boton.setBackground(primary);
+                tarjeta.setCursor(Cursor.getDefaultCursor());
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                boton.doClick();
+            }
+        });
+
+        tarjeta.add(boton, new GridBagConstraints());
+        return tarjeta;
     }
 
     private void mostrarPanel(JComponent panel) {

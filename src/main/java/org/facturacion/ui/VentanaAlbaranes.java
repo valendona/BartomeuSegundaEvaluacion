@@ -265,7 +265,13 @@ public class VentanaAlbaranes extends JPanel {
         }
 
         String id = (String) modeloAlbaranes.getValueAt(fila, 0);
-        Albaran albaran = albaranDAO.buscarPorId(id);
+        // Cargar el albarán junto con sus líneas dentro de la sesión para evitar LazyInitialization
+        Albaran albaran = albaranDAO.buscarPorIdConLineas(id);
+
+        if (albaran == null) {
+            JOptionPane.showMessageDialog(this, "Albarán no encontrado");
+            return;
+        }
 
         if (albaran.isFacturado()) {
             JOptionPane.showMessageDialog(this, "Este albarán ya está facturado");
@@ -281,8 +287,8 @@ public class VentanaAlbaranes extends JPanel {
                 albaran.getTotal()
         );
 
-        facturaDAO.guardar(factura);
-
+        // Convertir líneas de albarán a líneas de factura
+        List<LineaFactura> lineasAFacturar = new ArrayList<>();
         for (LineaAlbaran la : albaran.getLineas()) {
             LineaFactura lf = new LineaFactura(
                     factura,
@@ -290,14 +296,23 @@ public class VentanaAlbaranes extends JPanel {
                     la.getCantidad(),
                     la.getSubtotal()
             );
-            lineaFacturaDAO.guardar(lf);
+            lineasAFacturar.add(lf);
         }
 
-        albaran.setFacturado(true);
-        albaranDAO.actualizar(albaran);
+        try {
+            // Guardar factura y líneas en una sola transacción que también actualiza stock
+            facturaDAO.guardarConLineas(factura, lineasAFacturar);
 
-        JOptionPane.showMessageDialog(this, "Albarán convertido en factura correctamente");
+            // Marcar albarán como facturado solo si la operación anterior fue exitosa
+            albaran.setFacturado(true);
+            albaranDAO.actualizar(albaran);
 
-        cargarAlbaranes();
+            JOptionPane.showMessageDialog(this, "Albarán convertido en factura correctamente");
+
+            cargarAlbaranes();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error convirtiendo el albarán: " + e.getMessage());
+        }
     }
 }

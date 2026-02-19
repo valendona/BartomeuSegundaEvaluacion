@@ -35,7 +35,7 @@ public class ArticuloDAO {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.remove(session.contains(Articulo.class) ? articulo : session.merge(articulo));
+            session.remove(session.contains(articulo) ? articulo : session.merge(articulo));
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();

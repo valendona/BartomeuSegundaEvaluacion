@@ -23,6 +23,5 @@ public class Configuracion {
     public String getClave() { return clave; }
     public double getValor() { return valor; }
 
-    public void setClave(String clave) { this.clave = clave; }
     public void setValor(double valor) { this.valor = valor; }
 }

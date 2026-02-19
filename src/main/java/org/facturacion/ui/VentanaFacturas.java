@@ -213,18 +213,18 @@ public class VentanaFacturas extends JPanel {
                 total
         );
 
-        facturaDAO.guardar(factura);
+        try {
+            facturaDAO.guardarConLineas(factura, lineasActuales);
 
-        for (LineaFactura lf : lineasActuales) {
-            lf.setFactura(factura);
-            lineaDAO.guardar(lf);
+            JOptionPane.showMessageDialog(this, "Factura guardada correctamente");
+
+            modeloLineas.setRowCount(0);
+            lineasActuales.clear();
+            cargarFacturas();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error guardando factura: " + e.getMessage());
         }
-
-        JOptionPane.showMessageDialog(this, "Factura guardada correctamente");
-
-        modeloLineas.setRowCount(0);
-        lineasActuales.clear();
-        cargarFacturas();
     }
 
     private void eliminarFactura() {

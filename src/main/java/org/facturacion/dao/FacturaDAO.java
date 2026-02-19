@@ -2,6 +2,8 @@ package org.facturacion.dao;
 
 import org.facturacion.config.HibernateUtil;
 import org.facturacion.model.Factura;
+import org.facturacion.model.LineaFactura;
+import org.facturacion.model.Articulo;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -17,6 +19,40 @@ public class FacturaDAO {
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
+        }
+    }
+
+    public void guardarConLineas(Factura factura, List<LineaFactura> lineas) {
+        Transaction tx = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+
+            session.persist(factura);
+
+            for (LineaFactura lf : lineas) {
+                // Asegurarse de trabajar con el artículo gestionado
+                Articulo managedArticulo = session.get(Articulo.class, lf.getArticulo().getCodigo());
+                if (managedArticulo == null) {
+                    throw new RuntimeException("Artículo no encontrado: " + lf.getArticulo().getCodigo());
+                }
+
+                int nuevoStock = managedArticulo.getStock() - lf.getCantidad();
+                if (nuevoStock < 0) {
+                    throw new RuntimeException("Stock insuficiente para el artículo: " + managedArticulo.getCodigo());
+                }
+
+                managedArticulo.setStock(nuevoStock);
+                session.merge(managedArticulo);
+
+                lf.setArticulo(managedArticulo);
+                lf.setFactura(factura);
+                session.persist(lf);
+            }
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
         }
     }
 
