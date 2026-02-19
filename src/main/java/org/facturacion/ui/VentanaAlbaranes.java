@@ -17,6 +17,9 @@ public class VentanaAlbaranes extends JPanel {
     private final JTable tablaLineas, tablaAlbaranes;
 
     private final DefaultTableModel modeloLineas, modeloAlbaranes;
+    private JComboBox<String> comboOrdenarAlbaranes;
+    private JComboBox<String> comboBuscarAlbaranes;
+    private JTextField txtBuscarAlbaranes;
 
     private final ClienteDAO clienteDAO = new ClienteDAO();
     private final ArticuloDAO articuloDAO = new ArticuloDAO();
@@ -115,7 +118,32 @@ public class VentanaAlbaranes extends JPanel {
         // ---------------------------------------------------------
         JPanel contenedorCentral = new JPanel(new BorderLayout());
         contenedorCentral.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0)); // ← ESPACIO REAL
-        contenedorCentral.add(split, BorderLayout.CENTER);
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(Color.WHITE);
+        JPanel buscarPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buscarPanel.setBackground(Color.WHITE);
+        buscarPanel.add(new JLabel("Buscar por:"));
+        comboBuscarAlbaranes = new JComboBox<>();
+        txtBuscarAlbaranes = new JTextField(16);
+        JButton btnBuscarAl = new JButton("Buscar"); btnBuscarAl.addActionListener(e -> buscarAlbaranes());
+        JButton btnLimpiarAl = new JButton("Limpiar"); btnLimpiarAl.addActionListener(e -> { txtBuscarAlbaranes.setText(""); cargarAlbaranes(); });
+        buscarPanel.add(comboBuscarAlbaranes); buscarPanel.add(txtBuscarAlbaranes); buscarPanel.add(btnBuscarAl); buscarPanel.add(btnLimpiarAl);
+
+        JPanel ordenPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        ordenPanel.setBackground(Color.WHITE);
+        ordenPanel.add(new JLabel("Ordenar por:"));
+        comboOrdenarAlbaranes = new JComboBox<>();
+        comboOrdenarAlbaranes.addActionListener(e -> {int idx = comboOrdenarAlbaranes.getSelectedIndex(); if (idx>=0) ordenarAlbaranesPorColumna(idx);});
+        ordenPanel.add(comboOrdenarAlbaranes);
+
+        JPanel topControls = new JPanel(new BorderLayout());
+        topControls.setBackground(Color.WHITE);
+        topControls.add(buscarPanel, BorderLayout.WEST);
+        topControls.add(ordenPanel, BorderLayout.EAST);
+
+        header.add(topControls, BorderLayout.NORTH);
+        header.add(split, BorderLayout.CENTER);
+        contenedorCentral.add(header, BorderLayout.CENTER);
 
         add(contenedorCentral, BorderLayout.CENTER);
 
@@ -153,6 +181,30 @@ public class VentanaAlbaranes extends JPanel {
                     a.isFacturado() ? "Sí" : "No"
             });
         }
+        poblarComboOrdenarAlbaranes();
+        poblarComboBuscarAlbaranes();
+    }
+
+    private void poblarComboOrdenarAlbaranes(){
+        comboOrdenarAlbaranes.removeAllItems();
+        for (int i=0;i<modeloAlbaranes.getColumnCount();i++) comboOrdenarAlbaranes.addItem(modeloAlbaranes.getColumnName(i));
+        comboOrdenarAlbaranes.setSelectedIndex(-1);
+    }
+
+    private void poblarComboBuscarAlbaranes(){
+        comboBuscarAlbaranes.removeAllItems();
+        for (int i=0;i<modeloAlbaranes.getColumnCount();i++) comboBuscarAlbaranes.addItem(modeloAlbaranes.getColumnName(i));
+        comboBuscarAlbaranes.setSelectedIndex(-1);
+    }
+
+    private void ordenarAlbaranesPorColumna(int colIndex){
+        int rows = modeloAlbaranes.getRowCount();
+        java.util.List<Object[]> datos = new java.util.ArrayList<>();
+        for (int r=0;r<rows;r++){ Object[] fila = new Object[modeloAlbaranes.getColumnCount()]; for (int c=0;c<fila.length;c++) fila[c]=modeloAlbaranes.getValueAt(r,c); datos.add(fila);}
+        java.util.Comparator<Object[]> cmp = (a,b)->{ Object va=a[colIndex], vb=b[colIndex]; if (va==null) va=""; if (vb==null) vb=""; try{ Double da=Double.valueOf(va.toString()); Double db=Double.valueOf(vb.toString()); return da.compareTo(db);}catch(Exception ex){return va.toString().toLowerCase().compareTo(vb.toString().toLowerCase());}};
+        datos.sort(cmp);
+        modeloAlbaranes.setRowCount(0);
+        for (Object[] f:datos) modeloAlbaranes.addRow(f);
     }
 
     private void agregarLinea() {
@@ -310,9 +362,22 @@ public class VentanaAlbaranes extends JPanel {
             JOptionPane.showMessageDialog(this, "Albarán convertido en factura correctamente");
 
             cargarAlbaranes();
+            // Recargar artículos para mostrar stock actualizado
+            cargarArticulos();
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error convirtiendo el albarán: " + e.getMessage());
+        }
+    }
+
+    private void buscarAlbaranes(){
+        int col = comboBuscarAlbaranes.getSelectedIndex();
+        String q = txtBuscarAlbaranes.getText();
+        if (col<0 || q==null || q.isBlank()){ cargarAlbaranes(); return; }
+        q = q.toLowerCase(); modeloAlbaranes.setRowCount(0);
+        for (Albaran a: albaranDAO.listarTodos()){
+            Object[] row = new Object[]{ a.getId(), a.getCliente().getNif(), a.getFecha(), a.getIva(), a.getTotal(), a.isFacturado()?"Sí":"No" };
+            Object field = row[col]; String s = field==null?"":field.toString().toLowerCase(); if (s.contains(q)) modeloAlbaranes.addRow(row);
         }
     }
 }

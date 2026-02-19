@@ -17,6 +17,9 @@ public class VentanaFacturas extends JPanel {
     private final JTable tablaLineas, tablaFacturas;
 
     private final DefaultTableModel modeloLineas, modeloFacturas;
+    private JComboBox<String> comboOrdenarFacturas;
+    private JComboBox<String> comboBuscarFacturas;
+    private JTextField txtBuscarFacturas;
 
     private final ClienteDAO clienteDAO = new ClienteDAO();
     private final ArticuloDAO articuloDAO = new ArticuloDAO();
@@ -109,7 +112,32 @@ public class VentanaFacturas extends JPanel {
         // ---------------------------------------------------------
         JPanel contenedorCentral = new JPanel(new BorderLayout());
         contenedorCentral.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-        contenedorCentral.add(split, BorderLayout.CENTER);
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(Color.WHITE);
+        JPanel buscarPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buscarPanel.setBackground(Color.WHITE);
+        buscarPanel.add(new JLabel("Buscar por:"));
+        comboBuscarFacturas = new JComboBox<>();
+        txtBuscarFacturas = new JTextField(14);
+        JButton btnBuscar = new JButton("Buscar"); btnBuscar.addActionListener(e -> buscarFacturas());
+        JButton btnLimpiar = new JButton("Limpiar"); btnLimpiar.addActionListener(e -> { txtBuscarFacturas.setText(""); cargarFacturas(); });
+        buscarPanel.add(comboBuscarFacturas); buscarPanel.add(txtBuscarFacturas); buscarPanel.add(btnBuscar); buscarPanel.add(btnLimpiar);
+
+        JPanel ordenPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        ordenPanel.setBackground(Color.WHITE);
+        ordenPanel.add(new JLabel("Ordenar por:"));
+        comboOrdenarFacturas = new JComboBox<>();
+        comboOrdenarFacturas.addActionListener(e -> {int idx = comboOrdenarFacturas.getSelectedIndex(); if (idx>=0) ordenarFacturasPorColumna(idx);});
+        ordenPanel.add(comboOrdenarFacturas);
+
+        JPanel topControls = new JPanel(new BorderLayout());
+        topControls.setBackground(Color.WHITE);
+        topControls.add(buscarPanel, BorderLayout.WEST);
+        topControls.add(ordenPanel, BorderLayout.EAST);
+
+        header.add(topControls, BorderLayout.NORTH);
+        header.add(split, BorderLayout.CENTER);
+        contenedorCentral.add(header, BorderLayout.CENTER);
 
         add(contenedorCentral, BorderLayout.CENTER);
 
@@ -146,6 +174,30 @@ public class VentanaFacturas extends JPanel {
                     f.getTotal()
             });
         }
+        poblarComboOrdenarFacturas();
+        poblarComboBuscarFacturas();
+    }
+
+    private void poblarComboOrdenarFacturas(){
+        comboOrdenarFacturas.removeAllItems();
+        for (int i=0;i<modeloFacturas.getColumnCount();i++) comboOrdenarFacturas.addItem(modeloFacturas.getColumnName(i));
+        comboOrdenarFacturas.setSelectedIndex(-1);
+    }
+
+    private void poblarComboBuscarFacturas(){
+        comboBuscarFacturas.removeAllItems();
+        for (int i=0;i<modeloFacturas.getColumnCount();i++) comboBuscarFacturas.addItem(modeloFacturas.getColumnName(i));
+        comboBuscarFacturas.setSelectedIndex(-1);
+    }
+
+    private void ordenarFacturasPorColumna(int colIndex){
+        int rows = modeloFacturas.getRowCount();
+        java.util.List<Object[]> datos = new java.util.ArrayList<>();
+        for (int r=0;r<rows;r++){ Object[] fila = new Object[modeloFacturas.getColumnCount()]; for (int c=0;c<fila.length;c++) fila[c]=modeloFacturas.getValueAt(r,c); datos.add(fila);}
+        java.util.Comparator<Object[]> cmp = (a,b)->{ Object va=a[colIndex], vb=b[colIndex]; if (va==null) va=""; if (vb==null) vb=""; try{ Double da=Double.valueOf(va.toString()); Double db=Double.valueOf(vb.toString()); return da.compareTo(db);}catch(Exception ex){return va.toString().toLowerCase().compareTo(vb.toString().toLowerCase());}};
+        datos.sort(cmp);
+        modeloFacturas.setRowCount(0);
+        for (Object[] f:datos) modeloFacturas.addRow(f);
     }
 
     private void agregarLinea() {
@@ -221,6 +273,8 @@ public class VentanaFacturas extends JPanel {
             modeloLineas.setRowCount(0);
             lineasActuales.clear();
             cargarFacturas();
+            // Recargar artículos para actualizar el stock visible en la UI
+            cargarArticulos();
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error guardando factura: " + e.getMessage());
@@ -250,5 +304,16 @@ public class VentanaFacturas extends JPanel {
 
         JOptionPane.showMessageDialog(this, "Factura eliminada correctamente");
         cargarFacturas();
+    }
+
+    private void buscarFacturas(){
+        int col = comboBuscarFacturas.getSelectedIndex();
+        String q = txtBuscarFacturas.getText();
+        if (col<0 || q==null || q.isBlank()){ cargarFacturas(); return; }
+        q = q.toLowerCase(); modeloFacturas.setRowCount(0);
+        for (Factura f: facturaDAO.listarTodas()){
+            Object[] row = new Object[]{ f.getId(), f.getCliente().getNif(), f.getFecha(), f.getIva(), f.getTotal() };
+            Object field = row[col]; String s = field==null?"":field.toString().toLowerCase(); if (s.contains(q)) modeloFacturas.addRow(row);
+        }
     }
 }

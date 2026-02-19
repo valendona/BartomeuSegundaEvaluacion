@@ -76,13 +76,13 @@ public class VentanaPrincipal extends JFrame {
         inicio.add(titulo, BorderLayout.NORTH);
 
         // Usar dos filas centradas: topRow (3 tarjetas) y bottomRow (2 tarjetas)
-        JPanel topRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        JPanel topRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 30));
         topRow.setBackground(Color.WHITE);
         topRow.add(createShortcutButton("Clientes", "Gestiona clientes", e -> mostrarPanel(new VentanaClientes())));
         topRow.add(createShortcutButton("Artículos", "Gestiona artículos", e -> mostrarPanel(new VentanaArticulos())));
         topRow.add(createShortcutButton("Albaranes", "Gestiona albaranes", e -> mostrarPanel(new VentanaAlbaranes())));
 
-        JPanel bottomRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        JPanel bottomRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 30));
         bottomRow.setBackground(Color.WHITE);
         bottomRow.add(createShortcutButton("Facturas", "Gestiona facturas", e -> mostrarPanel(new VentanaFacturas())));
         bottomRow.add(createShortcutButton("Configuración", "Ajustes del sistema", e -> mostrarPanel(new VentanaConfiguracion())));
@@ -112,52 +112,28 @@ public class VentanaPrincipal extends JFrame {
     private JComponent createShortcutButton(String title, String subtitle, java.awt.event.ActionListener action) {
         JPanel tarjeta = new JPanel(new GridBagLayout());
         tarjeta.setBackground(Color.WHITE);
-        tarjeta.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)));
+        // Borde redondeado ligero para la tarjeta
+        tarjeta.setBorder(BorderFactory.createLineBorder(new Color(220,220,220), 1, true));
 
         final Color primary = new Color(66, 133, 244);
-        final Color hover = new Color(52, 103, 188);
-
         JButton boton = new JButton();
         boton.setFocusPainted(false);
         boton.setBackground(primary);
         boton.setForeground(Color.WHITE);
-        boton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        boton.setFont(new Font("Segoe UI", Font.BOLD, 16));
         boton.setHorizontalAlignment(SwingConstants.CENTER);
         boton.setVerticalAlignment(SwingConstants.CENTER);
-        boton.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        boton.setPreferredSize(new Dimension(220, 110));
-        // Usa HTML para saltos de línea y estilo, centrado
-        boton.setText("<html><div style='text-align:center'><span style='font-size:16px; font-weight:bold'>" + title + "</span><br><span style='font-size:12px;'>" + subtitle + "</span></div></html>");
+        // Borde redondeado para el botón que acompaña a la tarjeta
+        boton.setBorder(BorderFactory.createLineBorder(new Color(200,200,200), 1, true));
+        // Aumentar tamaño de las tarjetas
+        boton.setPreferredSize(new Dimension(250, 150));
+        // Usa HTML para saltos de línea y estilo, centrado (fuentes más grandes)
+        boton.setText("<html><div style='text-align:center'><span style='font-size:20px; font-weight:bold'>" + title + "</span><br><span style='font-size:14px;'>" + subtitle + "</span></div></html>");
         boton.addActionListener(action);
         boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // Hover en boton
-        boton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                boton.setBackground(hover);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                boton.setBackground(primary);
-            }
-        });
-
-        // Hacer que toda la tarjeta sea clicable y muestre hover también
+        // Mantener la tarjeta clicable pero SIN efectos visuales de hover
         tarjeta.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                boton.setBackground(hover);
-                tarjeta.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                boton.setBackground(primary);
-                tarjeta.setCursor(Cursor.getDefaultCursor());
-            }
-
             @Override
             public void mouseClicked(MouseEvent e) {
                 boton.doClick();

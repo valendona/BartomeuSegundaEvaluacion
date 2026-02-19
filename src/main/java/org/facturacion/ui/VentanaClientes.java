@@ -6,12 +6,17 @@ import org.facturacion.model.Cliente;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.*;
+import java.util.List;
 
 public class VentanaClientes extends JPanel {
 
     private final JTextField txtNif, txtNombre, txtApellido, txtDireccion, txtTelefono, txtEmail;
     private final JTable tablaClientes;
     private final DefaultTableModel modelo;
+    private final JComboBox<String> comboOrdenar = new JComboBox<>();
+    private JComboBox<String> comboBuscar;
+    private JTextField txtBuscar;
 
     private final ClienteDAO clienteDAO = new ClienteDAO();
 
@@ -94,7 +99,41 @@ public class VentanaClientes extends JPanel {
         // CONTENEDOR CENTRAL CON ESPACIO SUPERIOR
         JPanel contenedorCentral = new JPanel(new BorderLayout());
         contenedorCentral.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-        contenedorCentral.add(new JScrollPane(tablaClientes), BorderLayout.CENTER);
+        // Panel para controles sobre la tabla (buscar + ordenar en la misma línea)
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(Color.WHITE);
+
+        JPanel buscarPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buscarPanel.setBackground(Color.WHITE);
+        buscarPanel.add(new JLabel("Buscar por:"));
+        comboBuscar = new JComboBox<>();
+        txtBuscar = new JTextField(18);
+        JButton btnBuscar = new JButton("Buscar");
+        btnBuscar.addActionListener(e -> buscarClientes());
+        JButton btnLimpiar = new JButton("Limpiar");
+        btnLimpiar.addActionListener(e -> { txtBuscar.setText(""); cargarClientes();});
+        buscarPanel.add(comboBuscar);
+        buscarPanel.add(txtBuscar);
+        buscarPanel.add(btnBuscar);
+        buscarPanel.add(btnLimpiar);
+
+        JPanel ordenPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        ordenPanel.setBackground(Color.WHITE);
+        ordenPanel.add(new JLabel("Ordenar por:"));
+        comboOrdenar.addActionListener(e -> {
+            int idx = comboOrdenar.getSelectedIndex();
+            if (idx >= 0) ordenarPorColumna(idx);
+        });
+        ordenPanel.add(comboOrdenar);
+
+        JPanel topControls = new JPanel(new BorderLayout());
+        topControls.setBackground(Color.WHITE);
+        topControls.add(buscarPanel, BorderLayout.WEST);
+        topControls.add(ordenPanel, BorderLayout.EAST);
+
+        header.add(topControls, BorderLayout.NORTH);
+        header.add(new JScrollPane(tablaClientes), BorderLayout.CENTER);
+        contenedorCentral.add(header, BorderLayout.CENTER);
 
         add(contenedorCentral, BorderLayout.CENTER);
 
@@ -113,6 +152,50 @@ public class VentanaClientes extends JPanel {
                     c.getEmail()
             });
         }
+        poblarComboOrdenar();
+        poblarComboBuscar();
+    }
+
+    private void poblarComboOrdenar() {
+        comboOrdenar.removeAllItems();
+        for (int i = 0; i < modelo.getColumnCount(); i++) {
+            comboOrdenar.addItem(modelo.getColumnName(i));
+        }
+        comboOrdenar.setSelectedIndex(-1);
+    }
+
+    private void poblarComboBuscar() {
+        comboBuscar.removeAllItems();
+        for (int i = 0; i < modelo.getColumnCount(); i++) comboBuscar.addItem(modelo.getColumnName(i));
+        comboBuscar.setSelectedIndex(-1);
+    }
+
+    private void ordenarPorColumna(int colIndex) {
+        int rows = modelo.getRowCount();
+        List<Object[]> datos = new ArrayList<>();
+        for (int r = 0; r < rows; r++) {
+            Object[] fila = new Object[modelo.getColumnCount()];
+            for (int c = 0; c < fila.length; c++) fila[c] = modelo.getValueAt(r, c);
+            datos.add(fila);
+        }
+
+        Comparator<Object[]> cmp = (a, b) -> {
+            Object va = a[colIndex];
+            Object vb = b[colIndex];
+            if (va == null) va = "";
+            if (vb == null) vb = "";
+            try {
+                Double da = Double.valueOf(va.toString());
+                Double db = Double.valueOf(vb.toString());
+                return da.compareTo(db);
+            } catch (Exception ex) {
+                return va.toString().toLowerCase().compareTo(vb.toString().toLowerCase());
+            }
+        };
+
+        datos.sort(cmp);
+        modelo.setRowCount(0);
+        for (Object[] f : datos) modelo.addRow(f);
     }
 
     private void cargarSeleccion() {
@@ -194,5 +277,24 @@ public class VentanaClientes extends JPanel {
         clienteDAO.eliminar(c);
         cargarClientes();
         JOptionPane.showMessageDialog(this, "Cliente eliminado correctamente");
+    }
+
+    private void buscarClientes() {
+        int col = comboBuscar.getSelectedIndex();
+        String q = txtBuscar.getText();
+        if (col < 0 || q == null || q.isBlank()) {
+            cargarClientes();
+            return;
+        }
+        q = q.toLowerCase();
+        modelo.setRowCount(0);
+        for (Cliente c : clienteDAO.listarTodos()) {
+            Object[] row = new Object[]{
+                    c.getNif(), c.getNombre(), c.getApellido(), c.getDireccion(), c.getTelefono(), c.getEmail()
+            };
+            Object field = row[col];
+            String s = field == null ? "" : field.toString().toLowerCase();
+            if (s.contains(q)) modelo.addRow(row);
+        }
     }
 }
