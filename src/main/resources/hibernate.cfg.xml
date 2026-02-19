@@ -20,7 +20,9 @@
         <mapping class="org.facturacion.model.Articulo"/>
         <mapping class="org.facturacion.model.Factura"/>
         <mapping class="org.facturacion.model.LineaFactura"/>
-
+        <mapping class="org.facturacion.model.Configuracion"/>
+        <mapping class="org.facturacion.model.LineaAlbaran"/>
+        <mapping class="org.facturacion.model.Albaran"/>
 
     </session-factory>
 </hibernate-configuration>

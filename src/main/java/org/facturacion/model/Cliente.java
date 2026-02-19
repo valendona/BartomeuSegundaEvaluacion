@@ -9,35 +9,37 @@ import jakarta.persistence.Table;
 public class Cliente {
 
     @Id
-    private String dni;
+    private String nif;
 
     private String nombre;
     private String apellido;
+    private String direccion;
+    private String telefono;
+    private String email;
 
-    public Cliente() {
-        // Constructor vacío requerido por Hibernate
-    }
+    public Cliente() {}
 
-    public Cliente(String dni, String nombre, String apellido) {
-        this.dni = dni;
+    public Cliente(String nif, String nombre, String apellido,
+                   String direccion, String telefono, String email) {
+        this.nif = nif;
         this.nombre = nombre;
         this.apellido = apellido;
+        this.direccion = direccion;
+        this.telefono = telefono;
+        this.email = email;
     }
 
-    public String getDni() {
-        return dni;
-    }
+    public String getNif() { return nif; }
+    public String getNombre() { return nombre; }
+    public String getApellido() { return apellido; }
+    public String getDireccion() { return direccion; }
+    public String getTelefono() { return telefono; }
+    public String getEmail() { return email; }
 
-    public String getNombre() {
-        return nombre;
-    }
-
-    public String getApellido() {
-        return apellido;
-    }
-
-    @Override
-    public String toString() {
-        return dni + " - " + nombre + " " + apellido;
-    }
+    public void setNif(String nif) { this.nif = nif; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setApellido(String apellido) { this.apellido = apellido; }
+    public void setDireccion(String direccion) { this.direccion = direccion; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
+    public void setEmail(String email) { this.email = email; }
 }

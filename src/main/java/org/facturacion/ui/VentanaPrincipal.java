@@ -5,32 +5,62 @@ import java.awt.*;
 
 public class VentanaPrincipal extends JFrame {
 
+    private final JPanel panelContenido;
+
     public VentanaPrincipal() {
 
         setTitle("Sistema de Facturación");
-        setSize(900, 600);
+        setSize(1000, 700);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        // Aplicar fondo global
-        getContentPane().setBackground(Estilos.COLOR_FONDO);
+        setLayout(new BorderLayout());
 
-        JTabbedPane pestañas = new JTabbedPane();
-        pestañas.setFont(Estilos.FUENTE_BOTON);
+        // -------------------------
+        // BARRA DE NAVEGACIÓN
+        // -------------------------
+        JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        pestañas.addTab("Inicio", new VentanaInicio());
-        pestañas.addTab("Clientes", new VentanaClientes());
-        pestañas.addTab("Artículos", new VentanaArticulos());
-        pestañas.addTab("Facturas", new VentanaFacturas());
-        pestañas.addTab("Configuración", new VentanaConfiguracion());
+        JButton btnInicio = new JButton("Inicio");
+        JButton btnClientes = new JButton("Clientes");
+        JButton btnArticulos = new JButton("Artículos");
+        JButton btnAlbaranes = new JButton("Albaranes");
+        JButton btnFacturas = new JButton("Facturas");
+        JButton btnConfig = new JButton("Configuración");
 
-        add(pestañas, BorderLayout.CENTER);
+        barra.add(btnInicio);
+        barra.add(btnClientes);
+        barra.add(btnArticulos);
+        barra.add(btnAlbaranes);
+        barra.add(btnFacturas);
+        barra.add(btnConfig);
+
+        add(barra, BorderLayout.NORTH);
+
+        // -------------------------
+        // PANEL CENTRAL
+        // -------------------------
+        panelContenido = new JPanel(new BorderLayout());
+        add(panelContenido, BorderLayout.CENTER);
+
+        // -------------------------
+        // ACCIONES DE LOS BOTONES
+        // -------------------------
+        btnInicio.addActionListener(e -> mostrarPanel(new JLabel("Bienvenido", SwingConstants.CENTER)));
+        btnClientes.addActionListener(e -> mostrarPanel(new VentanaClientes()));
+        btnArticulos.addActionListener(e -> mostrarPanel(new VentanaArticulos()));
+        btnAlbaranes.addActionListener(e -> mostrarPanel(new VentanaAlbaranes()));
+        btnFacturas.addActionListener(e -> mostrarPanel(new VentanaFacturas()));
+        btnConfig.addActionListener(e -> mostrarPanel(new VentanaConfiguracion()));
+
+        // Mostrar inicio por defecto
+        mostrarPanel(new JLabel("Bienvenido", SwingConstants.CENTER));
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Theme.aplicarTemaGlobal();
-            new VentanaPrincipal().setVisible(true);
-        });
+    private void mostrarPanel(JComponent panel) {
+        panelContenido.removeAll();
+        panelContenido.add(panel, BorderLayout.CENTER);
+        panelContenido.revalidate();
+        panelContenido.repaint();
     }
 }

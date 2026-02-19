@@ -9,65 +9,173 @@ import java.awt.*;
 
 public class VentanaArticulos extends JPanel {
 
-    private JTextField txtNombre, txtPrecio;
-    private JTable tabla;
-    private DefaultTableModel modelo;
+    private final JTextField txtCodigo, txtNombre, txtPrecio, txtStock;
+    private final JTable tablaArticulos;
+    private final DefaultTableModel modelo;
 
-    private ArticuloDAO articuloDAO = new ArticuloDAO();
+    private final ArticuloDAO articuloDAO = new ArticuloDAO();
 
     public VentanaArticulos() {
 
         setLayout(new BorderLayout());
-        setBackground(Estilos.COLOR_FONDO);
+        setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        JPanel panelSuperior = new JPanel(new GridLayout(3, 2, 10, 10));
-        panelSuperior.setBackground(Estilos.COLOR_FONDO);
+        // ---------------------------------------------------------
+        // FORMULARIO SUPERIOR
+        // ---------------------------------------------------------
+        JPanel panelForm = new JPanel(new GridLayout(4, 2, 10, 10));
+        panelForm.setBackground(Color.WHITE);
 
-        panelSuperior.add(new JLabel("Nombre:"));
+        panelForm.add(new JLabel("Código:"));
+        txtCodigo = new JTextField();
+        panelForm.add(txtCodigo);
+
+        panelForm.add(new JLabel("Nombre:"));
         txtNombre = new JTextField();
-        panelSuperior.add(txtNombre);
+        panelForm.add(txtNombre);
 
-        panelSuperior.add(new JLabel("Precio:"));
+        panelForm.add(new JLabel("Precio:"));
         txtPrecio = new JTextField();
-        panelSuperior.add(txtPrecio);
+        panelForm.add(txtPrecio);
 
-        BotonEstilizado btnGuardar = new BotonEstilizado("Guardar Artículo");
+        panelForm.add(new JLabel("Stock:"));
+        txtStock = new JTextField();
+        panelForm.add(txtStock);
+
+        // ESPACIO ENTRE FORMULARIO Y TABLA
+        panelForm.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+
+        add(panelForm, BorderLayout.NORTH);
+
+        // ---------------------------------------------------------
+        // BOTONES INFERIORES
+        // ---------------------------------------------------------
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelBotones.setBackground(Color.WHITE);
+
+        JButton btnGuardar = new JButton("Guardar");
         btnGuardar.addActionListener(e -> guardarArticulo());
-        panelSuperior.add(btnGuardar);
+        panelBotones.add(btnGuardar);
 
-        add(panelSuperior, BorderLayout.NORTH);
+        JButton btnModificar = new JButton("Modificar");
+        btnModificar.addActionListener(e -> modificarArticulo());
+        panelBotones.add(btnModificar);
 
-        modelo = new DefaultTableModel(new String[]{"Nombre", "Precio"}, 0);
-        tabla = crearTablaBonita(modelo);
+        JButton btnEliminar = new JButton("Eliminar");
+        btnEliminar.addActionListener(e -> eliminarArticulo());
+        panelBotones.add(btnEliminar);
 
-        add(new JScrollPane(tabla), BorderLayout.CENTER);
+        add(panelBotones, BorderLayout.SOUTH);
 
-        cargarArticulos();
-    }
+        // ---------------------------------------------------------
+        // TABLA DE ARTÍCULOS
+        // ---------------------------------------------------------
+        modelo = new DefaultTableModel(
+                new String[]{"Código", "Nombre", "Precio", "Stock"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int col) { return false; }
+        };
 
-    private JTable crearTablaBonita(DefaultTableModel modelo) {
-        JTable tabla = new JTable(modelo);
-        tabla.setFont(Estilos.FUENTE_NORMAL);
-        tabla.setRowHeight(25);
+        tablaArticulos = new JTable(modelo);
+        tablaArticulos.setRowHeight(25);
 
-        tabla.getTableHeader().setFont(Estilos.FUENTE_BOTON);
-        tabla.getTableHeader().setBackground(new Color(66, 133, 244));
-        tabla.getTableHeader().setForeground(Color.WHITE);
+        tablaArticulos.getSelectionModel().addListSelectionListener(e -> cargarSeleccion());
 
-        return tabla;
-    }
+        // CONTENEDOR CENTRAL CON ESPACIO SUPERIOR
+        JPanel contenedorCentral = new JPanel(new BorderLayout());
+        contenedorCentral.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        contenedorCentral.add(new JScrollPane(tablaArticulos), BorderLayout.CENTER);
 
-    private void guardarArticulo() {
-        Articulo a = new Articulo(txtNombre.getText(), Double.parseDouble(txtPrecio.getText()));
-        articuloDAO.guardar(a);
+        add(contenedorCentral, BorderLayout.CENTER);
+
         cargarArticulos();
     }
 
     private void cargarArticulos() {
         modelo.setRowCount(0);
         for (Articulo a : articuloDAO.listarTodos()) {
-            modelo.addRow(new Object[]{a.getNombre(), a.getPrecio()});
+            modelo.addRow(new Object[]{
+                    a.getCodigo(),
+                    a.getNombre(),
+                    a.getPrecio(),
+                    a.getStock()
+            });
         }
+    }
+
+    private void cargarSeleccion() {
+        int fila = tablaArticulos.getSelectedRow();
+        if (fila == -1) return;
+
+        txtCodigo.setText((String) modelo.getValueAt(fila, 0));
+        txtNombre.setText((String) modelo.getValueAt(fila, 1));
+        txtPrecio.setText(String.valueOf(modelo.getValueAt(fila, 2)));
+        txtStock.setText(String.valueOf(modelo.getValueAt(fila, 3)));
+    }
+
+    private void guardarArticulo() {
+        try {
+            Articulo a = new Articulo(
+                    txtNombre.getText(),
+                    Double.parseDouble(txtPrecio.getText()),
+                    Integer.parseInt(txtStock.getText())
+            );
+
+            articuloDAO.guardar(a);
+            cargarArticulos();
+            JOptionPane.showMessageDialog(this, "Artículo guardado correctamente");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Datos inválidos");
+        }
+    }
+
+    private void modificarArticulo() {
+        int fila = tablaArticulos.getSelectedRow();
+        if (fila == -1) {
+            JOptionPane.showMessageDialog(this, "Selecciona un artículo");
+            return;
+        }
+
+        Articulo a = articuloDAO.buscarPorCodigo((String) modelo.getValueAt(fila, 0));
+
+        try {
+            a.setNombre(txtNombre.getText());
+            a.setPrecio(Double.parseDouble(txtPrecio.getText()));
+            a.setStock(Integer.parseInt(txtStock.getText()));
+
+            articuloDAO.actualizar(a);
+            cargarArticulos();
+            JOptionPane.showMessageDialog(this, "Artículo modificado correctamente");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Datos inválidos");
+        }
+    }
+
+    private void eliminarArticulo() {
+        int fila = tablaArticulos.getSelectedRow();
+        if (fila == -1) {
+            JOptionPane.showMessageDialog(this, "Selecciona un artículo");
+            return;
+        }
+
+        String codigo = (String) modelo.getValueAt(fila, 0);
+        Articulo a = articuloDAO.buscarPorCodigo(codigo);
+
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "¿Seguro que quieres eliminar el artículo?",
+                "Confirmar eliminación",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (confirm != JOptionPane.YES_OPTION) return;
+
+        articuloDAO.eliminar(a);
+        cargarArticulos();
+        JOptionPane.showMessageDialog(this, "Artículo eliminado correctamente");
     }
 }

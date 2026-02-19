@@ -17,7 +17,17 @@ public class ArticuloDAO {
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
-            e.printStackTrace();
+        }
+    }
+
+    public void actualizar(Articulo articulo) {
+        Transaction tx = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+            session.merge(articulo);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
         }
     }
 
@@ -25,17 +35,16 @@ public class ArticuloDAO {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.remove(articulo);
+            session.remove(session.contains(Articulo.class) ? articulo : session.merge(articulo));
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
-            e.printStackTrace();
         }
     }
 
-    public Articulo buscarPorId(int id) {
+    public Articulo buscarPorCodigo(String codigo) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.get(Articulo.class, id);
+            return session.get(Articulo.class, codigo);
         }
     }
 
@@ -45,4 +54,3 @@ public class ArticuloDAO {
         }
     }
 }
-

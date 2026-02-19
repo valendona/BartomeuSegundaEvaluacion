@@ -17,13 +17,6 @@ public class FacturaDAO {
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
-            e.printStackTrace();
-        }
-    }
-
-    public List<Factura> listarTodas() {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery("from Factura", Factura.class).list();
         }
     }
 
@@ -33,15 +26,29 @@ public class FacturaDAO {
         }
     }
 
+    public List<Factura> listarTodas() {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("from Factura", Factura.class).list();
+        }
+    }
+
+    public List<Factura> listarPorCliente(String nif) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                    "from Factura f where f.cliente.nif = :nif",
+                    Factura.class
+            ).setParameter("nif", nif).list();
+        }
+    }
+
     public void eliminar(Factura factura) {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.remove(factura);
+            session.remove(session.contains(factura) ? factura : session.merge(factura));
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
-            e.printStackTrace();
         }
     }
 }

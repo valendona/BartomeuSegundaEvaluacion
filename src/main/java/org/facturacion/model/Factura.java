@@ -1,6 +1,7 @@
 package org.facturacion.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -11,36 +12,36 @@ public class Factura {
     private String id;
 
     @ManyToOne
+    @JoinColumn(name = "cliente_nif")
     private Cliente cliente;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<LineaFactura> lineas;
+    private String fecha;   // ← AÑADIDO
+    private double iva;
+    private double total;
 
-    private double iva; // IVA aplicado en esta factura
+    @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL)
+    private List<LineaFactura> lineas = new ArrayList<>();
 
     public Factura() {}
 
-    public Factura(Cliente cliente, List<LineaFactura> lineas, double iva) {
-        this.id = generarIdFactura();
+    // ← CONSTRUCTOR COMPLETO
+    public Factura(Cliente cliente, String fecha, double iva, double total) {
+        this.id = "F" + System.currentTimeMillis();
         this.cliente = cliente;
-        this.lineas = lineas;
+        this.fecha = fecha;
         this.iva = iva;
-    }
-
-    public static String generarIdFactura() {
-        String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        StringBuilder sb = new StringBuilder("F");
-
-        for (int i = 0; i < 5; i++) {
-            int index = (int) (Math.random() * caracteres.length());
-            sb.append(caracteres.charAt(index));
-        }
-
-        return sb.toString();
+        this.total = total;
     }
 
     public String getId() { return id; }
     public Cliente getCliente() { return cliente; }
-    public List<LineaFactura> getLineas() { return lineas; }
+    public String getFecha() { return fecha; }   // ← GETTER AÑADIDO
     public double getIva() { return iva; }
+    public double getTotal() { return total; }
+    public List<LineaFactura> getLineas() { return lineas; }
+
+    public void addLinea(LineaFactura linea) {
+        lineas.add(linea);
+        linea.setFactura(this);
+    }
 }

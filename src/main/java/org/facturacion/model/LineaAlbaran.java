@@ -3,16 +3,16 @@ package org.facturacion.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "lineafactura")
-public class LineaFactura {
+@Table(name = "lineaalbaran")
+public class LineaAlbaran {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "factura_id")
-    private Factura factura;
+    @JoinColumn(name = "albaran_id")
+    private Albaran albaran;
 
     @ManyToOne
     @JoinColumn(name = "articulo_codigo")
@@ -21,20 +21,20 @@ public class LineaFactura {
     private int cantidad;
     private double subtotal;
 
-    public LineaFactura() {}
+    public LineaAlbaran() {}
 
-    public LineaFactura(Factura factura, Articulo articulo, int cantidad, double subtotal) {
-        this.factura = factura;
+    public LineaAlbaran(Albaran albaran, Articulo articulo, int cantidad, double subtotal) {
+        this.albaran = albaran;
         this.articulo = articulo;
         this.cantidad = cantidad;
         this.subtotal = subtotal;
     }
 
     public int getId() { return id; }
-    public Factura getFactura() { return factura; }
+    public Albaran getAlbaran() { return albaran; }
     public Articulo getArticulo() { return articulo; }
     public int getCantidad() { return cantidad; }
     public double getSubtotal() { return subtotal; }
 
-    public void setFactura(Factura factura) { this.factura = factura; }
+    public void setAlbaran(Albaran albaran) { this.albaran = albaran; }
 }

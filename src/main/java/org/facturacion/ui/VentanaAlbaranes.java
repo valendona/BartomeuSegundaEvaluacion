@@ -10,30 +10,32 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VentanaFacturas extends JPanel {
+public class VentanaAlbaranes extends JPanel {
 
     private final JComboBox<String> comboClientes, comboArticulos;
     private final JTextField txtCantidad;
-    private final JTable tablaLineas, tablaFacturas;
+    private final JTable tablaLineas, tablaAlbaranes;
 
-    private final DefaultTableModel modeloLineas, modeloFacturas;
+    private final DefaultTableModel modeloLineas, modeloAlbaranes;
 
     private final ClienteDAO clienteDAO = new ClienteDAO();
     private final ArticuloDAO articuloDAO = new ArticuloDAO();
-    private final FacturaDAO facturaDAO = new FacturaDAO();
-    private final LineaFacturaDAO lineaDAO = new LineaFacturaDAO();
+    private final AlbaranDAO albaranDAO = new AlbaranDAO();
+    private final LineaAlbaranDAO lineaDAO = new LineaAlbaranDAO();
     private final ConfiguracionDAO configDAO = new ConfiguracionDAO();
+    private final FacturaDAO facturaDAO = new FacturaDAO();
+    private final LineaFacturaDAO lineaFacturaDAO = new LineaFacturaDAO();
 
-    private final List<LineaFactura> lineasActuales = new ArrayList<>();
+    private final List<LineaAlbaran> lineasActuales = new ArrayList<>();
 
-    public VentanaFacturas() {
+    public VentanaAlbaranes() {
 
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         // ---------------------------------------------------------
-        // FORMULARIO SUPERIOR
+        // PANEL SUPERIOR (FORMULARIO)
         // ---------------------------------------------------------
         JPanel panelSuperior = new JPanel(new GridLayout(3, 2, 10, 10));
         panelSuperior.setBackground(Color.WHITE);
@@ -50,7 +52,7 @@ public class VentanaFacturas extends JPanel {
         txtCantidad = new JTextField();
         panelSuperior.add(txtCantidad);
 
-        // ESPACIO ENTRE FORMULARIO Y TABLAS
+        // ESPACIO EXTRA ENTRE FORMULARIO Y TABLAS
         panelSuperior.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
         add(panelSuperior, BorderLayout.NORTH);
@@ -65,13 +67,17 @@ public class VentanaFacturas extends JPanel {
         btnAgregarLinea.addActionListener(e -> agregarLinea());
         panelBotones.add(btnAgregarLinea);
 
-        JButton btnGuardar = new JButton("Guardar factura");
-        btnGuardar.addActionListener(e -> guardarFactura());
+        JButton btnGuardar = new JButton("Guardar albarán");
+        btnGuardar.addActionListener(e -> guardarAlbaran());
         panelBotones.add(btnGuardar);
 
-        JButton btnEliminar = new JButton("Eliminar factura");
-        btnEliminar.addActionListener(e -> eliminarFactura());
+        JButton btnEliminar = new JButton("Eliminar albarán");
+        btnEliminar.addActionListener(e -> eliminarAlbaran());
         panelBotones.add(btnEliminar);
+
+        JButton btnConvertir = new JButton("Convertir a factura");
+        btnConvertir.addActionListener(e -> convertirAFactura());
+        panelBotones.add(btnConvertir);
 
         add(panelBotones, BorderLayout.SOUTH);
 
@@ -88,19 +94,19 @@ public class VentanaFacturas extends JPanel {
         tablaLineas = new JTable(modeloLineas);
         tablaLineas.setRowHeight(25);
 
-        modeloFacturas = new DefaultTableModel(
-                new String[]{"ID", "Cliente (NIF)", "Fecha", "IVA", "Total"}, 0
+        modeloAlbaranes = new DefaultTableModel(
+                new String[]{"ID", "Cliente (NIF)", "Fecha", "IVA", "Total", "Facturado"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int col) { return false; }
         };
 
-        tablaFacturas = new JTable(modeloFacturas);
-        tablaFacturas.setRowHeight(25);
+        tablaAlbaranes = new JTable(modeloAlbaranes);
+        tablaAlbaranes.setRowHeight(25);
 
         JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 new JScrollPane(tablaLineas),
-                new JScrollPane(tablaFacturas)
+                new JScrollPane(tablaAlbaranes)
         );
         split.setDividerLocation(200);
 
@@ -108,7 +114,7 @@ public class VentanaFacturas extends JPanel {
         // CONTENEDOR CENTRAL CON ESPACIO SUPERIOR
         // ---------------------------------------------------------
         JPanel contenedorCentral = new JPanel(new BorderLayout());
-        contenedorCentral.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        contenedorCentral.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0)); // ← ESPACIO REAL
         contenedorCentral.add(split, BorderLayout.CENTER);
 
         add(contenedorCentral, BorderLayout.CENTER);
@@ -118,7 +124,7 @@ public class VentanaFacturas extends JPanel {
         // ---------------------------------------------------------
         cargarClientes();
         cargarArticulos();
-        cargarFacturas();
+        cargarAlbaranes();
     }
 
     private void cargarClientes() {
@@ -135,15 +141,16 @@ public class VentanaFacturas extends JPanel {
         }
     }
 
-    private void cargarFacturas() {
-        modeloFacturas.setRowCount(0);
-        for (Factura f : facturaDAO.listarTodas()) {   // ← MÉTODO CORRECTO
-            modeloFacturas.addRow(new Object[]{
-                    f.getId(),
-                    f.getCliente().getNif(),
-                    f.getFecha(),     // ← YA EXISTE
-                    f.getIva(),
-                    f.getTotal()
+    private void cargarAlbaranes() {
+        modeloAlbaranes.setRowCount(0);
+        for (Albaran a : albaranDAO.listarTodos()) {
+            modeloAlbaranes.addRow(new Object[]{
+                    a.getId(),
+                    a.getCliente().getNif(),
+                    a.getFecha(),
+                    a.getIva(),
+                    a.getTotal(),
+                    a.isFacturado() ? "Sí" : "No"
             });
         }
     }
@@ -180,13 +187,13 @@ public class VentanaFacturas extends JPanel {
                 subtotal
         });
 
-        lineasActuales.add(new LineaFactura(null, articulo, cantidad, subtotal));
+        lineasActuales.add(new LineaAlbaran(null, articulo, cantidad, subtotal));
     }
 
-    private void guardarFactura() {
+    private void guardarAlbaran() {
 
         if (lineasActuales.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "La factura no tiene líneas");
+            JOptionPane.showMessageDialog(this, "El albarán no tiene líneas");
             return;
         }
 
@@ -200,55 +207,97 @@ public class VentanaFacturas extends JPanel {
         Cliente cliente = clienteDAO.buscarPorNif(nif);
 
         double iva = configDAO.getIVA();
-        double totalSinIva = lineasActuales.stream().mapToDouble(LineaFactura::getSubtotal).sum();
+        double totalSinIva = lineasActuales.stream().mapToDouble(LineaAlbaran::getSubtotal).sum();
         double total = totalSinIva + (totalSinIva * iva / 100);
 
         String fecha = LocalDate.now().toString();
 
-        // ← CONSTRUCTOR CORRECTO
-        Factura factura = new Factura(
-                cliente,
-                fecha,
-                iva,
-                total
-        );
+        Albaran albaran = new Albaran(cliente, fecha, iva, total);
+        albaranDAO.guardar(albaran);
 
-        facturaDAO.guardar(factura);
-
-        for (LineaFactura lf : lineasActuales) {
-            lf.setFactura(factura);
-            lineaDAO.guardar(lf);
+        for (LineaAlbaran la : lineasActuales) {
+            la.setAlbaran(albaran);
+            lineaDAO.guardar(la);
         }
 
-        JOptionPane.showMessageDialog(this, "Factura guardada correctamente");
+        JOptionPane.showMessageDialog(this, "Albarán guardado correctamente");
 
         modeloLineas.setRowCount(0);
         lineasActuales.clear();
-        cargarFacturas();
+        cargarAlbaranes();
     }
 
-    private void eliminarFactura() {
-        int fila = tablaFacturas.getSelectedRow();
+    private void eliminarAlbaran() {
+        int fila = tablaAlbaranes.getSelectedRow();
         if (fila == -1) {
-            JOptionPane.showMessageDialog(this, "Selecciona una factura para eliminar");
+            JOptionPane.showMessageDialog(this, "Selecciona un albarán para eliminar");
             return;
         }
 
-        String id = (String) modeloFacturas.getValueAt(fila, 0);
-        Factura factura = facturaDAO.buscarPorId(id);
+        String id = (String) modeloAlbaranes.getValueAt(fila, 0);
+        Albaran albaran = albaranDAO.buscarPorId(id);
+
+        if (albaran.isFacturado()) {
+            JOptionPane.showMessageDialog(this, "No se puede eliminar un albarán ya facturado");
+            return;
+        }
 
         int confirm = JOptionPane.showConfirmDialog(
                 this,
-                "¿Seguro que quieres eliminar la factura " + id + "?",
+                "¿Seguro que quieres eliminar el albarán " + id + "?",
                 "Confirmar eliminación",
                 JOptionPane.YES_NO_OPTION
         );
 
         if (confirm != JOptionPane.YES_OPTION) return;
 
-        facturaDAO.eliminar(factura);
+        albaranDAO.eliminar(albaran);
 
-        JOptionPane.showMessageDialog(this, "Factura eliminada correctamente");
-        cargarFacturas();
+        JOptionPane.showMessageDialog(this, "Albarán eliminado correctamente");
+        cargarAlbaranes();
+    }
+
+    private void convertirAFactura() {
+        int fila = tablaAlbaranes.getSelectedRow();
+        if (fila == -1) {
+            JOptionPane.showMessageDialog(this, "Selecciona un albarán");
+            return;
+        }
+
+        String id = (String) modeloAlbaranes.getValueAt(fila, 0);
+        Albaran albaran = albaranDAO.buscarPorId(id);
+
+        if (albaran.isFacturado()) {
+            JOptionPane.showMessageDialog(this, "Este albarán ya está facturado");
+            return;
+        }
+
+        String fecha = LocalDate.now().toString();
+
+        Factura factura = new Factura(
+                albaran.getCliente(),
+                fecha,
+                albaran.getIva(),
+                albaran.getTotal()
+        );
+
+        facturaDAO.guardar(factura);
+
+        for (LineaAlbaran la : albaran.getLineas()) {
+            LineaFactura lf = new LineaFactura(
+                    factura,
+                    la.getArticulo(),
+                    la.getCantidad(),
+                    la.getSubtotal()
+            );
+            lineaFacturaDAO.guardar(lf);
+        }
+
+        albaran.setFacturado(true);
+        albaranDAO.actualizar(albaran);
+
+        JOptionPane.showMessageDialog(this, "Albarán convertido en factura correctamente");
+
+        cargarAlbaranes();
     }
 }

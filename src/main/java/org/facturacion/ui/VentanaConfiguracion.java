@@ -1,50 +1,50 @@
 package org.facturacion.ui;
 
+import org.facturacion.dao.ConfiguracionDAO;
+
 import javax.swing.*;
+import java.awt.*;
 
 public class VentanaConfiguracion extends JPanel {
 
-    private static double iva = 21.0;
+    private final JTextField txtIVA;
+    private final ConfiguracionDAO configDAO = new ConfiguracionDAO();
 
     public VentanaConfiguracion() {
 
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(Estilos.COLOR_FONDO);
+        setLayout(new BorderLayout());
+        setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel titulo = new JLabel("Configuración del Sistema");
-        titulo.setFont(Estilos.FUENTE_TITULO);
-        titulo.setAlignmentX(CENTER_ALIGNMENT);
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+        panel.setBackground(Color.WHITE);
 
-        JLabel lblIva = new JLabel("IVA (%):");
-        lblIva.setFont(Estilos.FUENTE_NORMAL);
-        lblIva.setAlignmentX(CENTER_ALIGNMENT);
+        panel.add(new JLabel("IVA global (%):"));
 
-        JTextField txtIva = new JTextField(String.valueOf(iva), 10);
-        txtIva.setMaximumSize(txtIva.getPreferredSize());
-        txtIva.setAlignmentX(CENTER_ALIGNMENT);
+        txtIVA = new JTextField(String.valueOf(configDAO.getIVA()));
+        panel.add(txtIVA);
 
-        BotonEstilizado btnGuardar = new BotonEstilizado("Guardar IVA");
-        btnGuardar.setAlignmentX(CENTER_ALIGNMENT);
+        JButton btnGuardar = new JButton("Guardar");
+        btnGuardar.addActionListener(e -> guardarIVA());
 
-        btnGuardar.addActionListener(e -> {
-            try {
-                iva = Double.parseDouble(txtIva.getText());
-                JOptionPane.showMessageDialog(this, "IVA actualizado correctamente");
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Introduce un número válido");
-            }
-        });
-
-        add(titulo);
-        add(Box.createVerticalStrut(20));
-        add(lblIva);
-        add(txtIva);
-        add(Box.createVerticalStrut(10));
-        add(btnGuardar);
+        add(panel, BorderLayout.NORTH);
+        add(btnGuardar, BorderLayout.SOUTH);
     }
 
-    public static double getIVA() {
-        return iva;
+    private void guardarIVA() {
+        try {
+            double nuevoIVA = Double.parseDouble(txtIVA.getText());
+
+            if (nuevoIVA < 0 || nuevoIVA > 100) {
+                JOptionPane.showMessageDialog(this, "El IVA debe estar entre 0 y 100");
+                return;
+            }
+
+            configDAO.setIVA(nuevoIVA);
+            JOptionPane.showMessageDialog(this, "IVA actualizado correctamente");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Valor inválido");
+        }
     }
 }
