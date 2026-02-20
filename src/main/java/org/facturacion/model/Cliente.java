@@ -19,6 +19,7 @@ public class Cliente {
 
     public Cliente() {}
 
+    //Constructor
     public Cliente(String nif, String nombre, String apellido,
                    String direccion, String telefono, String email) {
         this.nif = nif;

@@ -26,9 +26,7 @@ public class VentanaClientes extends JPanel {
         setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // ---------------------------------------------------------
-        // FORMULARIO SUPERIOR
-        // ---------------------------------------------------------
+        // Formulario Superior
         JPanel panelForm = new JPanel(new GridLayout(6, 2, 10, 10));
         panelForm.setBackground(Color.WHITE);
 
@@ -56,14 +54,12 @@ public class VentanaClientes extends JPanel {
         txtEmail = new JTextField();
         panelForm.add(txtEmail);
 
-        // ESPACIO ENTRE FORMULARIO Y TABLA
+        // Espacio entre formulario y tabla
         panelForm.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
         add(panelForm, BorderLayout.NORTH);
 
-        // ---------------------------------------------------------
-        // BOTONES INFERIORES
-        // ---------------------------------------------------------
+        // Botones Inferiores
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelBotones.setBackground(Color.WHITE);
 
@@ -90,9 +86,7 @@ public class VentanaClientes extends JPanel {
 
         add(panelBotones, BorderLayout.SOUTH);
 
-        // ---------------------------------------------------------
-        // TABLA DE CLIENTES
-        // ---------------------------------------------------------
+        // Tabla de clientes
         modelo = new DefaultTableModel(
                 new String[]{"NIF", "Nombre", "Apellido", "Dirección", "Teléfono", "Email"}, 0
         ) {
@@ -105,10 +99,11 @@ public class VentanaClientes extends JPanel {
 
         tablaClientes.getSelectionModel().addListSelectionListener(e -> cargarSeleccion());
 
-        // CONTENEDOR CENTRAL CON ESPACIO SUPERIOR
+        // Contenedor central con espacio superior
         JPanel contenedorCentral = new JPanel(new BorderLayout());
         contenedorCentral.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-        // Panel para controles sobre la tabla (buscar + ordenar en la misma línea)
+
+        // Panel para controles sobre la tabla
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Color.WHITE);
 
@@ -307,7 +302,7 @@ public class VentanaClientes extends JPanel {
         }
     }
 
-    // --- Métodos de import/export JSON ---
+    // Métodos de import/export JSON
     private void exportarClientesJson() {
         JFileChooser fc = new JFileChooser();
         int sel = fc.showSaveDialog(this);

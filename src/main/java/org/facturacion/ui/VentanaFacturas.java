@@ -36,9 +36,7 @@ public class VentanaFacturas extends JPanel {
         setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // ---------------------------------------------------------
-        // FORMULARIO SUPERIOR
-        // ---------------------------------------------------------
+        // Formulario Superior
         JPanel panelSuperior = new JPanel(new GridLayout(3, 2, 10, 10));
         panelSuperior.setBackground(Color.WHITE);
 
@@ -54,14 +52,12 @@ public class VentanaFacturas extends JPanel {
         txtCantidad = new JTextField();
         panelSuperior.add(txtCantidad);
 
-        // ESPACIO ENTRE FORMULARIO Y TABLAS
+        // Espacio entre formulario y tabla
         panelSuperior.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
         add(panelSuperior, BorderLayout.NORTH);
 
-        // ---------------------------------------------------------
-        // BOTONES INFERIORES
-        // ---------------------------------------------------------
+        // Botones Inferiores
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelBotones.setBackground(Color.WHITE);
 
@@ -91,9 +87,7 @@ public class VentanaFacturas extends JPanel {
 
         add(panelBotones, BorderLayout.SOUTH);
 
-        // ---------------------------------------------------------
-        // TABLAS
-        // ---------------------------------------------------------
+        // Tablas
         modeloLineas = new DefaultTableModel(
                 new String[]{"Artículo", "Cantidad", "Precio", "Subtotal"}, 0
         ) {
@@ -120,9 +114,7 @@ public class VentanaFacturas extends JPanel {
         );
         split.setDividerLocation(200);
 
-        // ---------------------------------------------------------
-        // CONTENEDOR CENTRAL CON ESPACIO SUPERIOR
-        // ---------------------------------------------------------
+        // Contenedor Central
         JPanel contenedorCentral = new JPanel(new BorderLayout());
         contenedorCentral.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         JPanel header = new JPanel(new BorderLayout());
@@ -154,9 +146,7 @@ public class VentanaFacturas extends JPanel {
 
         add(contenedorCentral, BorderLayout.CENTER);
 
-        // ---------------------------------------------------------
-        // CARGA DE DATOS
-        // ---------------------------------------------------------
+        // Simplemente carga de datos
         cargarClientes();
         cargarArticulos();
         cargarFacturas();
@@ -178,7 +168,7 @@ public class VentanaFacturas extends JPanel {
 
     private void cargarFacturas() {
         modeloFacturas.setRowCount(0);
-        for (Factura f : facturaDAO.listarTodas()) {   // ← MÉTODO CORRECTO
+        for (Factura f : facturaDAO.listarTodas()) {
             modeloFacturas.addRow(new Object[]{
                     f.getId(),
                     f.getCliente().getNif(),
@@ -270,7 +260,7 @@ public class VentanaFacturas extends JPanel {
 
         String fecha = LocalDate.now().toString();
 
-        // ← CONSTRUCTOR CORRECTO
+        // Constructor de Factura
         Factura factura = new Factura(
                 cliente,
                 fecha,
@@ -330,7 +320,7 @@ public class VentanaFacturas extends JPanel {
         }
     }
 
-    // --- Exportar factura a PDF ---
+    // Exportar a PDF
     private void exportarFacturaPdf() {
         int fila = tablaFacturas.getSelectedRow();
         if (fila == -1) {

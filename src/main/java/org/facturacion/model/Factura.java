@@ -24,7 +24,7 @@ public class Factura {
 
     public Factura() {}
 
-    // ← CONSTRUCTOR COMPLETO
+    // Constructor
     public Factura(Cliente cliente, String fecha, double iva, double total) {
         this.id = "F" + System.currentTimeMillis();
         this.cliente = cliente;

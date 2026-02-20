@@ -21,7 +21,7 @@ public class VentanaPrincipal extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        // Cargar icono(s) de la aplicación desde resources/
+        // Cargar icono
         try {
             List<Image> icons = new ArrayList<>();
             String[] candidates = {"/icon-16.png", "/icon-32.png", "/icon-64.png", "/icon.png"};
@@ -32,7 +32,7 @@ public class VentanaPrincipal extends JFrame {
                         if (img != null) icons.add(img);
                     }
                 } catch (Exception ex) {
-                    // seguir intentando con otros tamaños
+
                 }
             }
             if (!icons.isEmpty()) {
@@ -45,9 +45,7 @@ public class VentanaPrincipal extends JFrame {
 
         setLayout(new BorderLayout());
 
-        // -------------------------
-        // BARRA DE NAVEGACIÓN
-        // -------------------------
+        // Barra de navegacion
         JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         JButton btnInicio = new JButton("Inicio");
@@ -66,20 +64,14 @@ public class VentanaPrincipal extends JFrame {
 
         add(barra, BorderLayout.NORTH);
 
-        // -------------------------
-        // PANEL CENTRAL
-        // -------------------------
+        // Panel Central
         panelContenido = new JPanel(new BorderLayout());
         add(panelContenido, BorderLayout.CENTER);
 
-        // -------------------------
-        // INICIO (ACCESOS DIRECTOS)
-        // -------------------------
+        // Accesos directos
         panelInicio = buildInicioPanel();
 
-        // -------------------------
-        // ACCIONES DE LOS BOTONES
-        // -------------------------
+        // Acciones de los botones
         btnInicio.addActionListener(e -> mostrarPanel(panelInicio));
         btnClientes.addActionListener(e -> mostrarPanel(new VentanaClientes()));
         btnArticulos.addActionListener(e -> mostrarPanel(new VentanaArticulos()));
@@ -127,7 +119,7 @@ public class VentanaPrincipal extends JFrame {
 
         inicio.add(centerWrapper, BorderLayout.CENTER);
 
-        // Pie con ayuda breve
+        // Pie con indicacion de lo que hacen los shorcuts
         JLabel pie = new JLabel("Usa los accesos para navegar rápidamente", SwingConstants.CENTER);
         pie.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
         inicio.add(pie, BorderLayout.SOUTH);
@@ -149,16 +141,18 @@ public class VentanaPrincipal extends JFrame {
         boton.setFont(new Font("Segoe UI", Font.BOLD, 16));
         boton.setHorizontalAlignment(SwingConstants.CENTER);
         boton.setVerticalAlignment(SwingConstants.CENTER);
+
         // Borde redondeado para el botón que acompaña a la tarjeta
         boton.setBorder(BorderFactory.createLineBorder(new Color(200,200,200), 1, true));
+
         // Aumentar tamaño de las tarjetas
         boton.setPreferredSize(new Dimension(250, 150));
+
         // Usa HTML para saltos de línea y estilo, centrado (fuentes más grandes)
         boton.setText("<html><div style='text-align:center'><span style='font-size:20px; font-weight:bold'>" + title + "</span><br><span style='font-size:14px;'>" + subtitle + "</span></div></html>");
         boton.addActionListener(action);
         boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // Mantener la tarjeta clicable pero SIN efectos visuales de hover
         tarjeta.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

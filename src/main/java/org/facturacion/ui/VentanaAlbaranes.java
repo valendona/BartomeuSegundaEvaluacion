@@ -38,9 +38,7 @@ public class VentanaAlbaranes extends JPanel {
         setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // ---------------------------------------------------------
-        // PANEL SUPERIOR (FORMULARIO)
-        // ---------------------------------------------------------
+        // Formulario Superior
         JPanel panelSuperior = new JPanel(new GridLayout(3, 2, 10, 10));
         panelSuperior.setBackground(Color.WHITE);
 
@@ -56,14 +54,12 @@ public class VentanaAlbaranes extends JPanel {
         txtCantidad = new JTextField();
         panelSuperior.add(txtCantidad);
 
-        // ESPACIO EXTRA ENTRE FORMULARIO Y TABLAS
+        // Espacio entre formularios y tablas
         panelSuperior.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
         add(panelSuperior, BorderLayout.NORTH);
 
-        // ---------------------------------------------------------
-        // BOTONES INFERIORES
-        // ---------------------------------------------------------
+        // Botones Inferiores
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelBotones.setBackground(Color.WHITE);
 
@@ -85,9 +81,7 @@ public class VentanaAlbaranes extends JPanel {
 
         add(panelBotones, BorderLayout.SOUTH);
 
-        // ---------------------------------------------------------
-        // TABLAS
-        // ---------------------------------------------------------
+        // Tablas
         modeloLineas = new DefaultTableModel(
                 new String[]{"Artículo", "Cantidad", "Precio", "Subtotal"}, 0
         ) {
@@ -114,11 +108,9 @@ public class VentanaAlbaranes extends JPanel {
         );
         split.setDividerLocation(200);
 
-        // ---------------------------------------------------------
-        // CONTENEDOR CENTRAL CON ESPACIO SUPERIOR
-        // ---------------------------------------------------------
+        // Contenedor Central
         JPanel contenedorCentral = new JPanel(new BorderLayout());
-        contenedorCentral.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0)); // ← ESPACIO REAL
+        contenedorCentral.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Color.WHITE);
         JPanel buscarPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -148,9 +140,7 @@ public class VentanaAlbaranes extends JPanel {
 
         add(contenedorCentral, BorderLayout.CENTER);
 
-        // ---------------------------------------------------------
-        // CARGA DE DATOS
-        // ---------------------------------------------------------
+        // Cargar datos para mantener actualizado el formulario
         cargarClientes();
         cargarArticulos();
         cargarAlbaranes();

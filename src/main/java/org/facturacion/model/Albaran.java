@@ -22,9 +22,10 @@ public class Albaran {
 
     @OneToMany(mappedBy = "albaran", cascade = CascadeType.ALL)
     private List<LineaAlbaran> lineas = new ArrayList<>();
-
+    //Default Constructor
     public Albaran() {}
 
+    //Constructor
     public Albaran(Cliente cliente, String fecha, double iva, double total) {
         this.id = "A" + System.currentTimeMillis();
         this.cliente = cliente;

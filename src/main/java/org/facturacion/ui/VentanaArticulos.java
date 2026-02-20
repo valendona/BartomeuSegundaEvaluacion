@@ -24,15 +24,14 @@ public class VentanaArticulos extends JPanel {
         setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // ---------------------------------------------------------
-        // FORMULARIO SUPERIOR
-        // ---------------------------------------------------------
+        // Formulario Superior
         JPanel panelForm = new JPanel(new GridLayout(4, 2, 10, 10));
         panelForm.setBackground(Color.WHITE);
 
         panelForm.add(new JLabel("Código:"));
         txtCodigo = new JTextField();
-        // El código se genera automáticamente; no dejar que el usuario lo edite
+
+        // El código se genera automáticamente
         txtCodigo.setEditable(false);
         txtCodigo.setBackground(Color.LIGHT_GRAY);
         panelForm.add(txtCodigo);
@@ -49,14 +48,12 @@ public class VentanaArticulos extends JPanel {
         txtStock = new JTextField();
         panelForm.add(txtStock);
 
-        // ESPACIO ENTRE FORMULARIO Y TABLA
+        // Espacio entre formulario y tabla
         panelForm.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
         add(panelForm, BorderLayout.NORTH);
 
-        // ---------------------------------------------------------
-        // BOTONES INFERIORES
-        // ---------------------------------------------------------
+        // Botones Inferiores
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelBotones.setBackground(Color.WHITE);
 
@@ -83,9 +80,7 @@ public class VentanaArticulos extends JPanel {
 
         add(panelBotones, BorderLayout.SOUTH);
 
-        // ---------------------------------------------------------
-        // TABLA DE ARTÍCULOS
-        // ---------------------------------------------------------
+        // Tabla de Articulos
         modelo = new DefaultTableModel(
                 new String[]{"Código", "Nombre", "Precio", "Stock"}, 0
         ) {
@@ -98,7 +93,7 @@ public class VentanaArticulos extends JPanel {
 
         tablaArticulos.getSelectionModel().addListSelectionListener(e -> cargarSeleccion());
 
-        // CONTENEDOR CENTRAL CON ESPACIO SUPERIOR
+        // Contenedor central con espacio
         JPanel contenedorCentral = new JPanel(new BorderLayout());
         contenedorCentral.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         JPanel header = new JPanel(new BorderLayout());
@@ -269,7 +264,7 @@ public class VentanaArticulos extends JPanel {
         }
     }
 
-    // --- Métodos de import/export JSON ---
+    // Métodos de import/export JSON
     private void exportarArticulosJson() {
         JFileChooser fc = new JFileChooser();
         int sel = fc.showSaveDialog(this);
