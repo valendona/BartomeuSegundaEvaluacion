@@ -9,6 +9,7 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class VentanaAlbaranes extends JPanel {
 
@@ -176,8 +177,8 @@ public class VentanaAlbaranes extends JPanel {
                     a.getId(),
                     a.getCliente().getNif(),
                     a.getFecha(),
-                    a.getIva(),
-                    a.getTotal(),
+                    String.format(Locale.ENGLISH, "%.2f", a.getIva()),
+                    String.format(Locale.ENGLISH, "%.2f", a.getTotal()),
                     a.isFacturado() ? "Sí" : "No"
             });
         }
@@ -235,8 +236,8 @@ public class VentanaAlbaranes extends JPanel {
         modeloLineas.addRow(new Object[]{
                 articulo.getNombre(),
                 cantidad,
-                articulo.getPrecio(),
-                subtotal
+                String.format(Locale.ENGLISH, "%.2f", articulo.getPrecio()),
+                String.format(Locale.ENGLISH, "%.2f", subtotal)
         });
 
         lineasActuales.add(new LineaAlbaran(null, articulo, cantidad, subtotal));
@@ -376,7 +377,7 @@ public class VentanaAlbaranes extends JPanel {
         if (col<0 || q==null || q.isBlank()){ cargarAlbaranes(); return; }
         q = q.toLowerCase(); modeloAlbaranes.setRowCount(0);
         for (Albaran a: albaranDAO.listarTodos()){
-            Object[] row = new Object[]{ a.getId(), a.getCliente().getNif(), a.getFecha(), a.getIva(), a.getTotal(), a.isFacturado()?"Sí":"No" };
+            Object[] row = new Object[]{ a.getId(), a.getCliente().getNif(), a.getFecha(), String.format(Locale.ENGLISH, "%.2f", a.getIva()), String.format(Locale.ENGLISH, "%.2f", a.getTotal()), a.isFacturado()?"Sí":"No" };
             Object field = row[col]; String s = field==null?"":field.toString().toLowerCase(); if (s.contains(q)) modeloAlbaranes.addRow(row);
         }
     }

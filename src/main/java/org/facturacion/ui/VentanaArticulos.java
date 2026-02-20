@@ -32,6 +32,9 @@ public class VentanaArticulos extends JPanel {
 
         panelForm.add(new JLabel("Código:"));
         txtCodigo = new JTextField();
+        // El código se genera automáticamente; no dejar que el usuario lo edite
+        txtCodigo.setEditable(false);
+        txtCodigo.setBackground(Color.LIGHT_GRAY);
         panelForm.add(txtCodigo);
 
         panelForm.add(new JLabel("Nombre:"));
@@ -68,6 +71,15 @@ public class VentanaArticulos extends JPanel {
         JButton btnEliminar = new JButton("Eliminar");
         btnEliminar.addActionListener(e -> eliminarArticulo());
         panelBotones.add(btnEliminar);
+
+        // Botones de import/export JSON
+        JButton btnExportJson = new JButton("Exportar JSON");
+        btnExportJson.addActionListener(e -> exportarArticulosJson());
+        panelBotones.add(btnExportJson);
+
+        JButton btnImportJson = new JButton("Importar JSON");
+        btnImportJson.addActionListener(e -> importarArticulosJson());
+        panelBotones.add(btnImportJson);
 
         add(panelBotones, BorderLayout.SOUTH);
 
@@ -169,6 +181,7 @@ public class VentanaArticulos extends JPanel {
         int fila = tablaArticulos.getSelectedRow();
         if (fila == -1) return;
 
+        // Mostrar código pero no permitir editarlo
         txtCodigo.setText((String) modelo.getValueAt(fila, 0));
         txtNombre.setText((String) modelo.getValueAt(fila, 1));
         txtPrecio.setText(String.valueOf(modelo.getValueAt(fila, 2)));
@@ -185,6 +198,8 @@ public class VentanaArticulos extends JPanel {
 
             articuloDAO.guardar(a);
             cargarArticulos();
+            // Limpiar código ya que se genera automáticamente
+            txtCodigo.setText("");
             JOptionPane.showMessageDialog(this, "Artículo guardado correctamente");
 
         } catch (Exception e) {
@@ -234,9 +249,13 @@ public class VentanaArticulos extends JPanel {
 
         if (confirm != JOptionPane.YES_OPTION) return;
 
-        articuloDAO.eliminar(a);
-        cargarArticulos();
-        JOptionPane.showMessageDialog(this, "Artículo eliminado correctamente");
+        try {
+            articuloDAO.eliminar(a);
+            cargarArticulos();
+            JOptionPane.showMessageDialog(this, "Artículo eliminado correctamente");
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this, "No se pudo eliminar el artículo: " + ex.getMessage());
+        }
     }
 
     private void buscarArticulos(){
@@ -247,6 +266,38 @@ public class VentanaArticulos extends JPanel {
         for (Articulo a: articuloDAO.listarTodos()){
             Object[] row = new Object[]{ a.getCodigo(), a.getNombre(), a.getPrecio(), a.getStock() };
             Object field = row[col]; String s = field==null?"":field.toString().toLowerCase(); if (s.contains(q)) modelo.addRow(row);
+        }
+    }
+
+    // --- Métodos de import/export JSON ---
+    private void exportarArticulosJson() {
+        JFileChooser fc = new JFileChooser();
+        int sel = fc.showSaveDialog(this);
+        if (sel != JFileChooser.APPROVE_OPTION) return;
+        java.io.File f = fc.getSelectedFile();
+        try {
+            org.facturacion.io.ExportImportService svc = new org.facturacion.io.ExportImportService();
+            svc.exportArticulosToJson(f);
+            JOptionPane.showMessageDialog(this, "Exportación completada: " + f.getAbsolutePath());
+        } catch (org.facturacion.io.ImportExportException ex) {
+            JOptionPane.showMessageDialog(this, "Error en exportación: " + ex.getMessage());
+        }
+    }
+
+    private void importarArticulosJson() {
+        JFileChooser fc = new JFileChooser();
+        int sel = fc.showOpenDialog(this);
+        if (sel != JFileChooser.APPROVE_OPTION) return;
+        java.io.File f = fc.getSelectedFile();
+        int opcion = JOptionPane.showConfirmDialog(this, "¿Actualizar registros existentes si coincide Código?\n(Si no, sólo se añadirán nuevos)", "Modo importación", JOptionPane.YES_NO_OPTION);
+        boolean upsert = opcion == JOptionPane.YES_OPTION;
+        try {
+            org.facturacion.io.ExportImportService svc = new org.facturacion.io.ExportImportService();
+            int imported = svc.importArticulosFromJson(f, upsert);
+            cargarArticulos();
+            JOptionPane.showMessageDialog(this, "Importación completada. Registros procesados: " + imported);
+        } catch (org.facturacion.io.ImportExportException ex) {
+            JOptionPane.showMessageDialog(this, "Error en importación: " + ex.getMessage());
         }
     }
 }

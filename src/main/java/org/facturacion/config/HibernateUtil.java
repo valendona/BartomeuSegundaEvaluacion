@@ -30,7 +30,7 @@ public class HibernateUtil {
             try {
                 Configuration cfg = new Configuration();
 
-                // Añadir propiedades para H2 file-based (en ./data/facturacion_db)
+                // Añadir propiedades para H2 file-based
                 Properties props = new Properties();
                 props.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
                 props.put("hibernate.connection.driver_class", "org.h2.Driver");

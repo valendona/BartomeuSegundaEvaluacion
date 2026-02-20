@@ -79,6 +79,15 @@ public class VentanaClientes extends JPanel {
         btnEliminar.addActionListener(e -> eliminarCliente());
         panelBotones.add(btnEliminar);
 
+        // Botones de import/export JSON
+        JButton btnExportJson = new JButton("Exportar JSON");
+        btnExportJson.addActionListener(e -> exportarClientesJson());
+        panelBotones.add(btnExportJson);
+
+        JButton btnImportJson = new JButton("Importar JSON");
+        btnImportJson.addActionListener(e -> importarClientesJson());
+        panelBotones.add(btnImportJson);
+
         add(panelBotones, BorderLayout.SOUTH);
 
         // ---------------------------------------------------------
@@ -295,6 +304,38 @@ public class VentanaClientes extends JPanel {
             Object field = row[col];
             String s = field == null ? "" : field.toString().toLowerCase();
             if (s.contains(q)) modelo.addRow(row);
+        }
+    }
+
+    // --- Métodos de import/export JSON ---
+    private void exportarClientesJson() {
+        JFileChooser fc = new JFileChooser();
+        int sel = fc.showSaveDialog(this);
+        if (sel != JFileChooser.APPROVE_OPTION) return;
+        java.io.File f = fc.getSelectedFile();
+        try {
+            org.facturacion.io.ExportImportService svc = new org.facturacion.io.ExportImportService();
+            svc.exportClientesToJson(f);
+            JOptionPane.showMessageDialog(this, "Exportación completada: " + f.getAbsolutePath());
+        } catch (org.facturacion.io.ImportExportException ex) {
+            JOptionPane.showMessageDialog(this, "Error en exportación: " + ex.getMessage());
+        }
+    }
+
+    private void importarClientesJson() {
+        JFileChooser fc = new JFileChooser();
+        int sel = fc.showOpenDialog(this);
+        if (sel != JFileChooser.APPROVE_OPTION) return;
+        java.io.File f = fc.getSelectedFile();
+        int opcion = JOptionPane.showConfirmDialog(this, "¿Actualizar registros existentes si coincide NIF?\n(Si no, sólo se añadirán nuevos)", "Modo importación", JOptionPane.YES_NO_OPTION);
+        boolean upsert = opcion == JOptionPane.YES_OPTION;
+        try {
+            org.facturacion.io.ExportImportService svc = new org.facturacion.io.ExportImportService();
+            int imported = svc.importClientesFromJson(f, upsert);
+            cargarClientes();
+            JOptionPane.showMessageDialog(this, "Importación completada. Registros procesados: " + imported);
+        } catch (org.facturacion.io.ImportExportException ex) {
+            JOptionPane.showMessageDialog(this, "Error en importación: " + ex.getMessage());
         }
     }
 }

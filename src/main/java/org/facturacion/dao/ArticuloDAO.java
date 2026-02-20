@@ -35,10 +35,31 @@ public class ArticuloDAO {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
+
+            // Comprobar referencias en LineaFactura
+            Long cntFact = session.createQuery(
+                    "select count(l) from LineaFactura l where l.articulo.codigo = :codigo",
+                    Long.class
+            ).setParameter("codigo", articulo.getCodigo()).uniqueResult();
+
+            // Comprobar referencias en LineaAlbaran
+            Long cntAlb = session.createQuery(
+                    "select count(l) from LineaAlbaran l where l.articulo.codigo = :codigo",
+                    Long.class
+            ).setParameter("codigo", articulo.getCodigo()).uniqueResult();
+
+            if ((cntFact != null && cntFact > 0) || (cntAlb != null && cntAlb > 0)) {
+                throw new RuntimeException("No se puede eliminar el artículo: existen líneas de factura o albarán que lo referencian.");
+            }
+
             session.remove(session.contains(articulo) ? articulo : session.merge(articulo));
             tx.commit();
+        } catch (RuntimeException e) {
+            if (tx != null) tx.rollback();
+            throw e;
         } catch (Exception e) {
             if (tx != null) tx.rollback();
+            throw new RuntimeException("Error eliminando artículo", e);
         }
     }
 

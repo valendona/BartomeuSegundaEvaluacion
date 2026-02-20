@@ -9,6 +9,7 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class VentanaFacturas extends JPanel {
 
@@ -75,6 +76,18 @@ public class VentanaFacturas extends JPanel {
         JButton btnEliminar = new JButton("Eliminar factura");
         btnEliminar.addActionListener(e -> eliminarFactura());
         panelBotones.add(btnEliminar);
+
+        JButton btnExportPdf = new JButton("Exportar PDF");
+        btnExportPdf.addActionListener(e -> exportarFacturaPdf());
+        panelBotones.add(btnExportPdf);
+
+        JButton btnExportJson = new JButton("Exportar JSON");
+        btnExportJson.addActionListener(e -> exportarFacturasJson());
+        panelBotones.add(btnExportJson);
+
+        JButton btnImportJson = new JButton("Importar JSON");
+        btnImportJson.addActionListener(e -> importarFacturasJson());
+        panelBotones.add(btnImportJson);
 
         add(panelBotones, BorderLayout.SOUTH);
 
@@ -170,8 +183,8 @@ public class VentanaFacturas extends JPanel {
                     f.getId(),
                     f.getCliente().getNif(),
                     f.getFecha(),     // ← YA EXISTE
-                    f.getIva(),
-                    f.getTotal()
+                    String.format(Locale.ENGLISH, "%.2f", f.getIva()),
+                    String.format(Locale.ENGLISH, "%.2f", f.getTotal())
             });
         }
         poblarComboOrdenarFacturas();
@@ -228,8 +241,8 @@ public class VentanaFacturas extends JPanel {
         modeloLineas.addRow(new Object[]{
                 articulo.getNombre(),
                 cantidad,
-                articulo.getPrecio(),
-                subtotal
+                String.format(Locale.ENGLISH, "%.2f", articulo.getPrecio()),
+                String.format(Locale.ENGLISH, "%.2f", subtotal)
         });
 
         lineasActuales.add(new LineaFactura(null, articulo, cantidad, subtotal));
@@ -312,8 +325,70 @@ public class VentanaFacturas extends JPanel {
         if (col<0 || q==null || q.isBlank()){ cargarFacturas(); return; }
         q = q.toLowerCase(); modeloFacturas.setRowCount(0);
         for (Factura f: facturaDAO.listarTodas()){
-            Object[] row = new Object[]{ f.getId(), f.getCliente().getNif(), f.getFecha(), f.getIva(), f.getTotal() };
+            Object[] row = new Object[]{ f.getId(), f.getCliente().getNif(), f.getFecha(), String.format(Locale.ENGLISH, "%.2f", f.getIva()), String.format(Locale.ENGLISH, "%.2f", f.getTotal()) };
             Object field = row[col]; String s = field==null?"":field.toString().toLowerCase(); if (s.contains(q)) modeloFacturas.addRow(row);
         }
     }
+
+    // --- Exportar factura a PDF ---
+    private void exportarFacturaPdf() {
+        int fila = tablaFacturas.getSelectedRow();
+        if (fila == -1) {
+            JOptionPane.showMessageDialog(this, "Selecciona una factura para exportar");
+            return;
+        }
+
+        String id = (String) modeloFacturas.getValueAt(fila, 0);
+        org.facturacion.model.Factura factura = facturaDAO.buscarPorId(id);
+        if (factura == null) {
+            JOptionPane.showMessageDialog(this, "No se encontró la factura seleccionada (posible error de conexión)");
+            return;
+        }
+
+        JFileChooser fc = new JFileChooser();
+        int sel = fc.showSaveDialog(this);
+        if (sel != JFileChooser.APPROVE_OPTION) return;
+        java.io.File f = fc.getSelectedFile();
+        if (!f.getName().toLowerCase().endsWith(".pdf")) f = new java.io.File(f.getAbsolutePath() + ".pdf");
+
+        try {
+            org.facturacion.io.PdfExporter.exportFactura(factura, f);
+            JOptionPane.showMessageDialog(this, "PDF generado: " + f.getAbsolutePath());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error generando PDF: " + e.getMessage());
+        }
+    }
+
+    // Export/Import JSON de facturas
+    private void exportarFacturasJson() {
+        JFileChooser fc = new JFileChooser();
+        int sel = fc.showSaveDialog(this);
+        if (sel != JFileChooser.APPROVE_OPTION) return;
+        java.io.File f = fc.getSelectedFile();
+        try {
+            org.facturacion.io.ExportImportService svc = new org.facturacion.io.ExportImportService();
+            svc.exportFacturasToJson(f);
+            JOptionPane.showMessageDialog(this, "Exportación de facturas completada: " + f.getAbsolutePath());
+        } catch (org.facturacion.io.ImportExportException ex) {
+            JOptionPane.showMessageDialog(this, "Error en exportación: " + ex.getMessage());
+        }
+    }
+
+    private void importarFacturasJson() {
+        JFileChooser fc = new JFileChooser();
+        int sel = fc.showOpenDialog(this);
+        if (sel != JFileChooser.APPROVE_OPTION) return;
+        java.io.File f = fc.getSelectedFile();
+        int opcion = JOptionPane.showConfirmDialog(this, "¿Actualizar facturas existentes si coincide ID?\n(Si no, sólo se añadirán nuevas)", "Modo importación", JOptionPane.YES_NO_OPTION);
+        boolean upsert = opcion == JOptionPane.YES_OPTION;
+        try {
+            org.facturacion.io.ExportImportService svc = new org.facturacion.io.ExportImportService();
+            int imported = svc.importFacturasFromJson(f, upsert);
+            cargarFacturas();
+            JOptionPane.showMessageDialog(this, "Importación completada. Facturas procesadas: " + imported);
+        } catch (org.facturacion.io.ImportExportException ex) {
+            JOptionPane.showMessageDialog(this, "Error en importación: " + ex.getMessage());
+        }
+    }
+
 }

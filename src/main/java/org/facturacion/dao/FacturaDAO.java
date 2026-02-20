@@ -58,7 +58,12 @@ public class FacturaDAO {
 
     public Factura buscarPorId(String id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.get(Factura.class, id);
+            // Usar fetch para inicializar las lineas y el artículo de cada linea
+            Factura f = session.createQuery(
+                    "select distinct fa from Factura fa left join fetch fa.lineas l left join fetch l.articulo where fa.id = :id",
+                    Factura.class
+            ).setParameter("id", id).uniqueResult();
+            return f;
         }
     }
 

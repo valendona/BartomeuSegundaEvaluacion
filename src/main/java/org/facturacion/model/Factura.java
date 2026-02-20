@@ -44,4 +44,11 @@ public class Factura {
         lineas.add(linea);
         linea.setFactura(this);
     }
+
+    // setters para import
+    public void setId(String id) { this.id = id; }
+    public void setCliente(Cliente cliente) { this.cliente = cliente; }
+    public void setFecha(String fecha) { this.fecha = fecha; }
+    public void setIva(double iva) { this.iva = iva; }
+    public void setTotal(double total) { this.total = total; }
 }

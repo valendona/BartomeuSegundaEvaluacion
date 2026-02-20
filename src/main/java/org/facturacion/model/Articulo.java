@@ -36,4 +36,6 @@ public class Articulo {
     public void setNombre(String nombre) { this.nombre = nombre; }
     public void setPrecio(double precio) { this.precio = precio; }
     public void setStock(int stock) { this.stock = stock; }
+    // Setter para importación JSON cuando el código no viene en el fichero
+    public void setCodigo(String codigo) { this.codigo = codigo; }
 }

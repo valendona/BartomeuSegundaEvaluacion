@@ -1,9 +1,13 @@
 package org.facturacion.ui;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -16,6 +20,28 @@ public class VentanaPrincipal extends JFrame {
         setSize(1000, 700);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        // Cargar icono(s) de la aplicación desde resources/
+        try {
+            List<Image> icons = new ArrayList<>();
+            String[] candidates = {"/icon-16.png", "/icon-32.png", "/icon-64.png", "/icon.png"};
+            for (String path : candidates) {
+                try (InputStream is = getClass().getResourceAsStream(path)) {
+                    if (is != null) {
+                        Image img = ImageIO.read(is);
+                        if (img != null) icons.add(img);
+                    }
+                } catch (Exception ex) {
+                    // seguir intentando con otros tamaños
+                }
+            }
+            if (!icons.isEmpty()) {
+                // setIconImages acepta una lista de imágenes (mejor para diferentes DPI)
+                setIconImages(icons);
+            }
+        } catch (Exception e) {
+            // no hacemos nada si falla la carga del icono
+        }
 
         setLayout(new BorderLayout());
 
