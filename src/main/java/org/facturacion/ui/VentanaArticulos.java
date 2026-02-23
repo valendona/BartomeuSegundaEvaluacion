@@ -25,33 +25,44 @@ public class VentanaArticulos extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         // Formulario Superior
-        JPanel panelForm = new JPanel(new GridLayout(4, 2, 10, 10));
+        JPanel panelForm = new JPanel(new GridBagLayout());
         panelForm.setBackground(Color.WHITE);
 
-        panelForm.add(new JLabel("Código:"));
-        txtCodigo = new JTextField();
+        GridBagConstraints c = new GridBagConstraints();
+        // Reducir separación horizontal y controlar alineación: etiquetas a la derecha (cerca del campo)
+        c.insets = new Insets(6,4,6,6);
+        c.anchor = GridBagConstraints.WEST;
 
-        // El código se genera automáticamente
-        txtCodigo.setEditable(false);
-        txtCodigo.setBackground(Color.LIGHT_GRAY);
-        panelForm.add(txtCodigo);
+        // Código (pequeño, generado)
+        c.gridx = 0; c.gridy = 0; c.weightx = 0; c.fill = GridBagConstraints.NONE; c.anchor = GridBagConstraints.EAST;
+        panelForm.add(new JLabel("Código:"), c);
+        txtCodigo = new JTextField(); txtCodigo.setEditable(false); txtCodigo.setBackground(Color.LIGHT_GRAY); txtCodigo.setPreferredSize(new Dimension(120,26));
+        c.gridx = 1; c.gridy = 0; c.weightx = 1; c.anchor = GridBagConstraints.WEST;
+        panelForm.add(txtCodigo, c);
 
-        panelForm.add(new JLabel("Nombre:"));
-        txtNombre = new JTextField();
-        panelForm.add(txtNombre);
+        // Nombre (medio)
+        c.gridx = 0; c.gridy = 1; c.anchor = GridBagConstraints.EAST; panelForm.add(new JLabel("Nombre:"), c);
+        txtNombre = new JTextField(); txtNombre.setPreferredSize(new Dimension(300,26));
+        c.gridx = 1; c.gridy = 1; c.anchor = GridBagConstraints.WEST; panelForm.add(txtNombre, c);
 
-        panelForm.add(new JLabel("Precio:"));
-        txtPrecio = new JTextField();
-        panelForm.add(txtPrecio);
+        // Precio (pequeño)
+        c.gridx = 0; c.gridy = 2; c.anchor = GridBagConstraints.EAST; panelForm.add(new JLabel("Precio:"), c);
+        txtPrecio = new JTextField(); txtPrecio.setPreferredSize(new Dimension(120,26));
+        c.gridx = 1; c.gridy = 2; c.anchor = GridBagConstraints.WEST; panelForm.add(txtPrecio, c);
 
-        panelForm.add(new JLabel("Stock:"));
-        txtStock = new JTextField();
-        panelForm.add(txtStock);
+        // Stock (pequeño)
+        c.gridx = 0; c.gridy = 3; c.anchor = GridBagConstraints.EAST; panelForm.add(new JLabel("Stock:"), c);
+        txtStock = new JTextField(); txtStock.setPreferredSize(new Dimension(120,26));
+        c.gridx = 1; c.gridy = 3; c.anchor = GridBagConstraints.WEST; panelForm.add(txtStock, c);
 
         // Espacio entre formulario y tabla
         panelForm.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
-        add(panelForm, BorderLayout.NORTH);
+        // Envolvemos el formulario para alinearlo a la izquierda
+        JPanel wrapperForm = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        wrapperForm.setBackground(Color.WHITE);
+        wrapperForm.add(panelForm);
+        add(wrapperForm, BorderLayout.NORTH);
 
         // Botones Inferiores
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT));

@@ -39,20 +39,29 @@ public class VentanaAlbaranes extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         // Formulario Superior
-        JPanel panelSuperior = new JPanel(new GridLayout(3, 2, 10, 10));
+        JPanel panelSuperior = new JPanel(new GridBagLayout());
         panelSuperior.setBackground(Color.WHITE);
 
-        panelSuperior.add(new JLabel("Cliente:"));
-        comboClientes = new JComboBox<>();
-        panelSuperior.add(comboClientes);
+        GridBagConstraints c = new GridBagConstraints();
+        // Etiquetas más próximas a los campos
+        c.insets = new Insets(6,4,6,6);
+        c.anchor = GridBagConstraints.WEST;
 
-        panelSuperior.add(new JLabel("Artículo:"));
-        comboArticulos = new JComboBox<>();
-        panelSuperior.add(comboArticulos);
+        // Cliente (ancho medio)
+        c.gridx = 0; c.gridy = 0; c.weightx = 0; c.fill = GridBagConstraints.NONE; c.anchor = GridBagConstraints.EAST;
+        panelSuperior.add(new JLabel("Cliente:"), c);
+        comboClientes = new JComboBox<>(); comboClientes.setPreferredSize(new Dimension(320,26));
+        c.gridx = 1; c.gridy = 0; c.weightx = 1; c.anchor = GridBagConstraints.WEST; panelSuperior.add(comboClientes, c);
 
-        panelSuperior.add(new JLabel("Cantidad:"));
-        txtCantidad = new JTextField();
-        panelSuperior.add(txtCantidad);
+        // Artículo (ancho medio)
+        c.gridx = 0; c.gridy = 1; c.weightx = 0; c.anchor = GridBagConstraints.EAST; panelSuperior.add(new JLabel("Artículo:"), c);
+        comboArticulos = new JComboBox<>(); comboArticulos.setPreferredSize(new Dimension(280,26));
+        c.gridx = 1; c.gridy = 1; c.weightx = 1; c.anchor = GridBagConstraints.WEST; panelSuperior.add(comboArticulos, c);
+
+        // Cantidad (pequeña)
+        c.gridx = 0; c.gridy = 2; c.weightx = 0; c.anchor = GridBagConstraints.EAST; panelSuperior.add(new JLabel("Cantidad:"), c);
+        txtCantidad = new JTextField(); txtCantidad.setPreferredSize(new Dimension(100,26));
+        c.gridx = 1; c.gridy = 2; c.weightx = 1; c.anchor = GridBagConstraints.WEST; panelSuperior.add(txtCantidad, c);
 
         // Espacio entre formularios y tablas
         panelSuperior.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));

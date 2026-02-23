@@ -27,37 +27,54 @@ public class VentanaClientes extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         // Formulario Superior
-        JPanel panelForm = new JPanel(new GridLayout(6, 2, 10, 10));
+        JPanel panelForm = new JPanel(new GridBagLayout());
         panelForm.setBackground(Color.WHITE);
 
-        panelForm.add(new JLabel("NIF:"));
-        txtNif = new JTextField();
-        panelForm.add(txtNif);
+        GridBagConstraints c = new GridBagConstraints();
+        // Etiquetas más cerca de los campos: margen izquierdo reducido
+        c.insets = new Insets(6, 4, 6, 6);
+        c.anchor = GridBagConstraints.WEST;
 
-        panelForm.add(new JLabel("Nombre:"));
-        txtNombre = new JTextField();
-        panelForm.add(txtNombre);
+        // NIF (más pequeño)
+        c.gridx = 0; c.gridy = 0; c.weightx = 0; c.fill = GridBagConstraints.NONE; c.anchor = GridBagConstraints.EAST;
+        panelForm.add(new JLabel("NIF:"), c);
+        txtNif = new JTextField(); txtNif.setPreferredSize(new Dimension(120, 26));
+        c.gridx = 1; c.gridy = 0; c.weightx = 1; c.anchor = GridBagConstraints.WEST;
+        panelForm.add(txtNif, c);
 
-        panelForm.add(new JLabel("Apellido:"));
-        txtApellido = new JTextField();
-        panelForm.add(txtApellido);
+        // Nombre (medio)
+        c.gridx = 0; c.gridy = 1; c.anchor = GridBagConstraints.EAST; panelForm.add(new JLabel("Nombre:"), c);
+        txtNombre = new JTextField(); txtNombre.setPreferredSize(new Dimension(220, 26));
+        c.gridx = 1; c.gridy = 1; c.anchor = GridBagConstraints.WEST; panelForm.add(txtNombre, c);
 
-        panelForm.add(new JLabel("Dirección:"));
-        txtDireccion = new JTextField();
-        panelForm.add(txtDireccion);
+        // Apellido (medio)
+        c.gridx = 0; c.gridy = 2; c.anchor = GridBagConstraints.EAST; panelForm.add(new JLabel("Apellido:"), c);
+        txtApellido = new JTextField(); txtApellido.setPreferredSize(new Dimension(220, 26));
+        c.gridx = 1; c.gridy = 2; c.anchor = GridBagConstraints.WEST; panelForm.add(txtApellido, c);
 
-        panelForm.add(new JLabel("Teléfono:"));
-        txtTelefono = new JTextField();
-        panelForm.add(txtTelefono);
+        // Dirección (más ancha)
+        c.gridx = 0; c.gridy = 3; c.anchor = GridBagConstraints.EAST; panelForm.add(new JLabel("Dirección:"), c);
+        txtDireccion = new JTextField(); txtDireccion.setPreferredSize(new Dimension(360, 26));
+        c.gridx = 1; c.gridy = 3; c.anchor = GridBagConstraints.WEST; panelForm.add(txtDireccion, c);
 
-        panelForm.add(new JLabel("Email:"));
-        txtEmail = new JTextField();
-        panelForm.add(txtEmail);
+        // Teléfono (pequeño)
+        c.gridx = 0; c.gridy = 4; c.anchor = GridBagConstraints.EAST; panelForm.add(new JLabel("Teléfono:"), c);
+        txtTelefono = new JTextField(); txtTelefono.setPreferredSize(new Dimension(140, 26));
+        c.gridx = 1; c.gridy = 4; c.anchor = GridBagConstraints.WEST; panelForm.add(txtTelefono, c);
+
+        // Email (medio)
+        c.gridx = 0; c.gridy = 5; c.anchor = GridBagConstraints.EAST; panelForm.add(new JLabel("Email:"), c);
+        txtEmail = new JTextField(); txtEmail.setPreferredSize(new Dimension(260, 26));
+        c.gridx = 1; c.gridy = 5; c.anchor = GridBagConstraints.WEST; panelForm.add(txtEmail, c);
 
         // Espacio entre formulario y tabla
         panelForm.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
-        add(panelForm, BorderLayout.NORTH);
+        // Alineamos el formulario a la izquierda usando un wrapper con FlowLayout(LEFT)
+        JPanel wrapperForm = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        wrapperForm.setBackground(Color.WHITE);
+        wrapperForm.add(panelForm);
+        add(wrapperForm, BorderLayout.NORTH);
 
         // Botones Inferiores
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT));

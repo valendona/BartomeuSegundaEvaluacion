@@ -15,17 +15,16 @@ public class VentanaFacturas extends JPanel {
 
     private final JComboBox<String> comboClientes, comboArticulos;
     private final JTextField txtCantidad;
-    private final JTable tablaLineas, tablaFacturas;
+    private final JTable tablaFacturas;
 
     private final DefaultTableModel modeloLineas, modeloFacturas;
-    private JComboBox<String> comboOrdenarFacturas;
-    private JComboBox<String> comboBuscarFacturas;
-    private JTextField txtBuscarFacturas;
+    private final JComboBox<String> comboOrdenarFacturas;
+    private final JComboBox<String> comboBuscarFacturas;
+    private final JTextField txtBuscarFacturas;
 
     private final ClienteDAO clienteDAO = new ClienteDAO();
     private final ArticuloDAO articuloDAO = new ArticuloDAO();
     private final FacturaDAO facturaDAO = new FacturaDAO();
-    private final LineaFacturaDAO lineaDAO = new LineaFacturaDAO();
     private final ConfiguracionDAO configDAO = new ConfiguracionDAO();
 
     private final List<LineaFactura> lineasActuales = new ArrayList<>();
@@ -37,25 +36,34 @@ public class VentanaFacturas extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         // Formulario Superior
-        JPanel panelSuperior = new JPanel(new GridLayout(3, 2, 10, 10));
-        panelSuperior.setBackground(Color.WHITE);
+         JPanel panelSuperior = new JPanel(new GridBagLayout());
+         panelSuperior.setBackground(Color.WHITE);
 
-        panelSuperior.add(new JLabel("Cliente:"));
-        comboClientes = new JComboBox<>();
-        panelSuperior.add(comboClientes);
+         GridBagConstraints c = new GridBagConstraints();
+         // Etiquetas cerca de los campos, reduce espacio horizontal
+         c.insets = new Insets(6,4,6,6);
+         c.anchor = GridBagConstraints.WEST;
 
-        panelSuperior.add(new JLabel("Artículo:"));
-        comboArticulos = new JComboBox<>();
-        panelSuperior.add(comboArticulos);
+         // Cliente (ancho medio)
+         c.gridx = 0; c.gridy = 0; c.weightx = 0; c.fill = GridBagConstraints.NONE; c.anchor = GridBagConstraints.EAST;
+         panelSuperior.add(new JLabel("Cliente:"), c);
+         comboClientes = new JComboBox<>(); comboClientes.setPreferredSize(new Dimension(320,26));
+         c.gridx = 1; c.gridy = 0; c.weightx = 1; c.anchor = GridBagConstraints.WEST; panelSuperior.add(comboClientes, c);
 
-        panelSuperior.add(new JLabel("Cantidad:"));
-        txtCantidad = new JTextField();
-        panelSuperior.add(txtCantidad);
+         // Artículo (ancho medio)
+         c.gridx = 0; c.gridy = 1; c.weightx = 0; c.anchor = GridBagConstraints.EAST; panelSuperior.add(new JLabel("Artículo:"), c);
+         comboArticulos = new JComboBox<>(); comboArticulos.setPreferredSize(new Dimension(280,26));
+         c.gridx = 1; c.gridy = 1; c.weightx = 1; c.anchor = GridBagConstraints.WEST; panelSuperior.add(comboArticulos, c);
 
-        // Espacio entre formulario y tabla
-        panelSuperior.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+         // Cantidad (pequeña)
+         c.gridx = 0; c.gridy = 2; c.weightx = 0; c.anchor = GridBagConstraints.EAST; panelSuperior.add(new JLabel("Cantidad:"), c);
+         txtCantidad = new JTextField(); txtCantidad.setPreferredSize(new Dimension(100,26));
+         c.gridx = 1; c.gridy = 2; c.weightx = 1; c.anchor = GridBagConstraints.WEST; panelSuperior.add(txtCantidad, c);
 
-        add(panelSuperior, BorderLayout.NORTH);
+         // Espacio entre formulario y tabla
+         panelSuperior.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+
+         add(panelSuperior, BorderLayout.NORTH);
 
         // Botones Inferiores
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -95,7 +103,7 @@ public class VentanaFacturas extends JPanel {
             public boolean isCellEditable(int row, int col) { return false; }
         };
 
-        tablaLineas = new JTable(modeloLineas);
+        JTable tablaLineas = new JTable(modeloLineas);
         tablaLineas.setRowHeight(25);
 
         modeloFacturas = new DefaultTableModel(
