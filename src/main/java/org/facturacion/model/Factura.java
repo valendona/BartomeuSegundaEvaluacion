@@ -15,7 +15,7 @@ public class Factura {
     @JoinColumn(name = "cliente_nif")
     private Cliente cliente;
 
-    private String fecha;   // ← AÑADIDO
+    private String fecha;
     private double iva;
     private double total;
 

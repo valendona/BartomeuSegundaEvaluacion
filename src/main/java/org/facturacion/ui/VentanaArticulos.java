@@ -102,6 +102,12 @@ public class VentanaArticulos extends JPanel {
         tablaArticulos = new JTable(modelo);
         tablaArticulos.setRowHeight(25);
 
+        // Ajustar anchos por columna
+        tablaArticulos.getColumnModel().getColumn(0).setPreferredWidth(80);  // Código
+        tablaArticulos.getColumnModel().getColumn(1).setPreferredWidth(300); // Nombre
+        tablaArticulos.getColumnModel().getColumn(2).setPreferredWidth(100); // Precio
+        tablaArticulos.getColumnModel().getColumn(3).setPreferredWidth(80);  // Stock
+
         tablaArticulos.getSelectionModel().addListSelectionListener(e -> cargarSeleccion());
 
         // Contenedor central con espacio

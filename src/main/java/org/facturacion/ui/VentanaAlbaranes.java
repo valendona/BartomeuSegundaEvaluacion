@@ -101,6 +101,12 @@ public class VentanaAlbaranes extends JPanel {
         tablaLineas = new JTable(modeloLineas);
         tablaLineas.setRowHeight(25);
 
+        // Ajustar anchos por columna
+        tablaLineas.getColumnModel().getColumn(0).setPreferredWidth(300); // Artículo
+        tablaLineas.getColumnModel().getColumn(1).setPreferredWidth(80);  // Cantidad
+        tablaLineas.getColumnModel().getColumn(2).setPreferredWidth(100); // Precio
+        tablaLineas.getColumnModel().getColumn(3).setPreferredWidth(120); // Subtotal
+
         modeloAlbaranes = new DefaultTableModel(
                 new String[]{"ID", "Cliente (NIF)", "Fecha", "IVA", "Total", "Facturado"}, 0
         ) {
@@ -110,6 +116,14 @@ public class VentanaAlbaranes extends JPanel {
 
         tablaAlbaranes = new JTable(modeloAlbaranes);
         tablaAlbaranes.setRowHeight(25);
+
+        //Ajustar Tabla Albaranes para mostrar bien los campos
+        tablaAlbaranes.getColumnModel().getColumn(0).setPreferredWidth(80);  // ID
+        tablaAlbaranes.getColumnModel().getColumn(1).setPreferredWidth(200); // Cliente (NIF)
+        tablaAlbaranes.getColumnModel().getColumn(2).setPreferredWidth(110); // Fecha
+        tablaAlbaranes.getColumnModel().getColumn(3).setPreferredWidth(60);  // IVA
+        tablaAlbaranes.getColumnModel().getColumn(4).setPreferredWidth(100); // Total
+        tablaAlbaranes.getColumnModel().getColumn(5).setPreferredWidth(80);  // Facturado
 
         JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 new JScrollPane(tablaLineas),

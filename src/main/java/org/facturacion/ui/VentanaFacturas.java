@@ -106,6 +106,11 @@ public class VentanaFacturas extends JPanel {
         JTable tablaLineas = new JTable(modeloLineas);
         tablaLineas.setRowHeight(25);
 
+        tablaLineas.getColumnModel().getColumn(0).setPreferredWidth(300); // Artículo
+        tablaLineas.getColumnModel().getColumn(1).setPreferredWidth(80);  // Cantidad
+        tablaLineas.getColumnModel().getColumn(2).setPreferredWidth(100); // Precio
+        tablaLineas.getColumnModel().getColumn(3).setPreferredWidth(120); // Subtotal
+
         modeloFacturas = new DefaultTableModel(
                 new String[]{"ID", "Cliente (NIF)", "Fecha", "IVA", "Total"}, 0
         ) {
@@ -115,6 +120,12 @@ public class VentanaFacturas extends JPanel {
 
         tablaFacturas = new JTable(modeloFacturas);
         tablaFacturas.setRowHeight(25);
+
+        tablaFacturas.getColumnModel().getColumn(0).setPreferredWidth(80);  // ID
+        tablaFacturas.getColumnModel().getColumn(1).setPreferredWidth(220); // Cliente (NIF)
+        tablaFacturas.getColumnModel().getColumn(2).setPreferredWidth(110); // Fecha
+        tablaFacturas.getColumnModel().getColumn(3).setPreferredWidth(60);  // IVA
+        tablaFacturas.getColumnModel().getColumn(4).setPreferredWidth(100); // Total
 
         JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 new JScrollPane(tablaLineas),

@@ -31,9 +31,9 @@ public class VentanaClientes extends JPanel {
         panelForm.setBackground(Color.WHITE);
 
         GridBagConstraints c = new GridBagConstraints();
-        // Etiquetas más cerca de los campos: margen izquierdo reducido
+        // Etiquetas más cerca de los campos
         c.insets = new Insets(6, 4, 6, 6);
-        c.anchor = GridBagConstraints.WEST;
+        c.anchor = GridBagConstraints.EAST;
 
         // NIF (más pequeño)
         c.gridx = 0; c.gridy = 0; c.weightx = 0; c.fill = GridBagConstraints.NONE; c.anchor = GridBagConstraints.EAST;
@@ -113,6 +113,14 @@ public class VentanaClientes extends JPanel {
 
         tablaClientes = new JTable(modelo);
         tablaClientes.setRowHeight(25);
+
+        //Ajustra anchos por columna
+        tablaClientes.getColumnModel().getColumn(0).setPreferredWidth(120); // NIF
+        tablaClientes.getColumnModel().getColumn(1).setPreferredWidth(220); // Nombre
+        tablaClientes.getColumnModel().getColumn(2).setPreferredWidth(220); // Apellido
+        tablaClientes.getColumnModel().getColumn(3).setPreferredWidth(360); // Dirección
+        tablaClientes.getColumnModel().getColumn(4).setPreferredWidth(140); // Teléfono
+        tablaClientes.getColumnModel().getColumn(5).setPreferredWidth(260); // Email
 
         tablaClientes.getSelectionModel().addListSelectionListener(e -> cargarSeleccion());
 

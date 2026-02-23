@@ -22,6 +22,9 @@ public class VentanaConfiguracion extends JPanel {
         panel.add(new JLabel("IVA global (%):"));
 
         txtIVA = new JTextField(String.valueOf(configDAO.getIVA()));
+        txtIVA.setPreferredSize(new Dimension(100, 28));
+        txtIVA.setMaximumSize(new Dimension(180, 28)); // evita que crezca demasiado
+
         panel.add(txtIVA);
 
         JButton btnGuardar = new JButton("Guardar");
